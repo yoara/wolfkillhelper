@@ -1,6 +1,6 @@
 import InitGame from './pages/initGame/InitGame';
 import ChooseView from './components/ChooseView';
-import ChooseCircleView from './components/ChooseCircleView';
+import ChooseCircleView from './pages/game/ChooseCircleView';
 import Main from './pages/game/Main';
 
 const Routes = {

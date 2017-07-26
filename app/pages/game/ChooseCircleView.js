@@ -2,13 +2,12 @@
  * Created by yoara on 2017/7/24.
  */
 import React from 'react';
-import * as Constants from '../common/Constants';
+import * as Constants from '../../common/Constants';
 import {
   View,
   Text,
   StyleSheet,
   TouchableHighlight,
-  ScrollView,
   DeviceEventEmitter,
   Alert
 } from 'react-native';
@@ -17,6 +16,7 @@ export default class ChooseView extends React.Component {
   constructor (props) {
     super(props);
     this.entityList = this.props.navigation.state.params.entityList || [];
+    this.bodyEntityList = this.props.navigation.state.params.bodyEntityList || [];
     this.eventName = this.props.navigation.state.params.eventName;
     this.dataField = this.props.navigation.state.params.dataField;
     this.contentViewStyle = this.props.navigation.state.params.contentViewStyle;
@@ -25,6 +25,7 @@ export default class ChooseView extends React.Component {
     this.state = {};
     this.headerChoice = {};
     this.bodyChoice = {};
+    this.voteInfo = [];
   }
 
   static navigationOptions = ({navigation}) => ({
@@ -41,15 +42,30 @@ export default class ChooseView extends React.Component {
       active[item.index + "headerActive"] = false;
       delete this.headerChoice[item.index];
     } else {
-      //自爆只能选择一个
-      if ('bomb' == this.dataField) {
+      //自爆或者投票只能选择一个
+      if ('bomb' == this.dataField || 'vote' == this.dataField) {
         if (Object.keys(this.headerChoice).length == 1) {
-          Alert.alert("自爆只能选择一个玩家");
+          Alert.alert("只能选择一个玩家");
           return;
         }
       }
       active[item.index + "headerActive"] = true;
       this.headerChoice[item.index] = item;
+    }
+    this.setState(active);
+  }
+
+  _bodyChoose (item) {
+    if (!item.isAlive) {
+      return;
+    }
+    let active = {};
+    if (this.state[item.index + "bodyActive"]) {
+      active[item.index + "bodyActive"] = false;
+      delete this.bodyChoice[item.index];
+    } else {
+      active[item.index + "bodyActive"] = true;
+      this.bodyChoice[item.index] = item;
     }
     this.setState(active);
   }
@@ -62,6 +78,19 @@ export default class ChooseView extends React.Component {
         style={[styles.tipContentView, active && styles.tipContentCheckedView,
           !item.isAlive && styles.tipContentReadOnlyView, this.contentViewStyle]}
         underlayColor='#f0f0f0' onPress={() => this._headerChoose(item)}>
+        <Text style={[styles.tipText, this.contentTextStyle]}>{item.text}</Text>
+      </TouchableHighlight>
+    );
+  }
+
+  _renderBodyItem (item, i) {
+    let active = this.state[item.index + "bodyActive"] ? true : false;
+    return (
+      <TouchableHighlight
+        key={i}
+        style={[styles.tipContentView, active && styles.tipContentCheckedView,
+          !item.isAlive && styles.tipContentReadOnlyView, this.contentViewStyle]}
+        underlayColor='#f0f0f0' onPress={() => this._bodyChoose(item)}>
         <Text style={[styles.tipText, this.contentTextStyle]}>{item.text}</Text>
       </TouchableHighlight>
     );
@@ -92,7 +121,7 @@ export default class ChooseView extends React.Component {
       return;
     }
     let data = {
-      item : this._getHeaderChoiceData()[0]
+      item : this._getHeaderChoiceData()
     };
     this._returnMain(data);
   }
@@ -122,6 +151,56 @@ export default class ChooseView extends React.Component {
     this.props.navigation.goBack();
   }
 
+  _vote () {
+    if (Object.keys(this.headerChoice).length == 0
+        &&Object.keys(this.bodyChoice).length == 0) {
+      Alert.alert("请选择投票结果");
+      return;
+    }
+
+    if (Object.keys(this.headerChoice).length > 0
+      &&Object.keys(this.bodyChoice).length == 0) {
+      Alert.alert("请选择投票玩家");
+      return;
+    }
+
+    let voter = [];
+    let vote = {};
+    for (let index in this.bodyChoice) {
+      voter.push(index);
+    }
+    let outer = "-1";
+    for (let index in this.headerChoice) {
+      outer = index + "";
+    }
+    vote[outer] = voter;
+    this.voteInfo.push(vote);
+
+    //清除选择数据
+    let active = {};
+    for (let index in this.headerChoice) {
+      active[index + "headerActive"] = false;
+    }
+    for (let index in this.bodyChoice) {
+      active[index + "bodyActive"] = false;
+    }
+    this.headerChoice = {};
+    this.bodyChoice = {};
+    this.setState(active);
+  }
+
+  _voteFinish () {
+    if(this.voteInfo.length==0){
+      Alert.alert("请录入投票结果");
+      return;
+    }
+    let data = {
+      item : this.voteInfo
+    }
+    this._returnMain(data);
+  }
+
+
   render () {
     return (
       <View style={[styles.container]}>
@@ -132,19 +211,24 @@ export default class ChooseView extends React.Component {
         </View>
 
         <View style={[styles.bodyContainer]}>
-
+          {
+            this.bodyEntityList.map((item, i) => this._renderBodyItem(item, i))
+          }
         </View>
 
         <View style={[styles.footerContainer]}>
+
           {
             this.dataField == 'bomb' ?
-              <TouchableHighlight
-                underlayColor="#E1F6FF"
-                onPress={() => this._bomb()}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>自爆</Text>
-              </TouchableHighlight>
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._bomb()}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>自爆</Text>
+                </TouchableHighlight>
+              </View>
               : <View/>
           }
           {
@@ -181,7 +265,7 @@ export default class ChooseView extends React.Component {
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._oneKill()}
+                  onPress={() => this._vote()}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>投票</Text>
@@ -189,7 +273,7 @@ export default class ChooseView extends React.Component {
 
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._twoKill()}
+                  onPress={() => this._voteFinish()}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>结束</Text>
@@ -209,14 +293,19 @@ const styles = StyleSheet.create({
     justifyContent : 'space-between',
   },
   headerContainer : {
-    height : Constants.culHeight(300),
+    height : Constants.culHeightByPercent(0.3),
     justifyContent : 'space-around',
     flexDirection : 'row',
     flexWrap : 'wrap'
   },
-  bodyContainer : {},
+  bodyContainer : {
+    height : Constants.culHeightByPercent(0.3),
+    justifyContent : 'space-around',
+    flexDirection : 'row',
+    flexWrap : 'wrap'
+  },
   footerContainer : {
-    height : Constants.culHeight(200),
+    height : Constants.culHeightByPercent(0.3),
     width : Constants.STANDARD_WIDTH,
     justifyContent : 'space-around',
     alignItems : 'center',

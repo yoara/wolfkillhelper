@@ -3,7 +3,8 @@
  */
 const NIGHT = {
   id : 0,
-  desc : '首夜'
+  desc : '首夜',
+  isNight : true
 };
 const JZJX = {
   id : 1,
@@ -15,7 +16,8 @@ const DAY_1 = {
 };
 const NIGHT_1 = {
   id : 3,
-  desc : '第一天夜间'
+  desc : '第一天夜间',
+  isNight : true
 };
 const DAY_2 = {
   id : 4,
@@ -23,7 +25,8 @@ const DAY_2 = {
 };
 const NIGHT_2 = {
   id : 5,
-  desc : '第二天夜间'
+  desc : '第二天夜间',
+  isNight : true
 };
 const DAY_3 = {
   id : 6,
@@ -31,7 +34,8 @@ const DAY_3 = {
 };
 const NIGHT_3 = {
   id : 7,
-  desc : '第三天夜间'
+  desc : '第三天夜间',
+  isNight : true
 };
 const DAY_4 = {
   id : 8,
@@ -39,7 +43,8 @@ const DAY_4 = {
 };
 const NIGHT_4 = {
   id : 9,
-  desc : '第四天夜间'
+  desc : '第四天夜间',
+  isNight : true
 };
 const DAY_5 = {
   id : 10,
@@ -47,7 +52,8 @@ const DAY_5 = {
 };
 const NIGHT_5 = {
   id : 11,
-  desc : '第五天夜间'
+  desc : '第五天夜间',
+  isNight : true
 };
 
 const timeLineList = [
@@ -57,7 +63,7 @@ const timeLineList = [
 ]
 let timeIndex = 0;
 function init () {
-  timeIndex = 0;
+  timeIndex = 1;
   return now();
 }
 
@@ -70,8 +76,13 @@ function move () {
   return now();
 }
 
+function next () {
+  return timeLineList[timeIndex + 1];
+}
+
 export{
   init,     //初始化时间轴
   now,      //当前时间轴
   move,     //时间轴前推
+  next,     //下一个时间轴
 }
