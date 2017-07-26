@@ -102,6 +102,13 @@ export default class Main extends React.Component {
         } else {
           this.refs.toast.show(maxIndex[0] + "号玩家被归票");
           addGameInfo(maxIndex[0] + "号玩家被归票", true);
+          //如果不是警长竞选阶段，则该玩家出局
+          gameData.gamers[parseInt(maxIndex[0]) - 1].isAlive = false;
+          gameData.gamers[parseInt(maxIndex[0]) - 1].action.push({
+            timeLine : gameData.timeLine,
+            time : time,
+            action : "归票出局"
+          });
           timeLimeMove();
         }
       } else if ('kill' == field) {
