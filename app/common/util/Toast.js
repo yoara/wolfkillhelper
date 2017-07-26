@@ -86,6 +86,7 @@ export default class Toast extends Component {
   }
 
   render () {
+    //好东西
     let pos;
     switch (this.props.position) {
       case 'top':

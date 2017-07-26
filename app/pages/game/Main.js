@@ -45,11 +45,10 @@ export default class Main extends React.Component {
           action : '自爆了' + (gameData.timeLine.id == 1 ? "并炸掉了警徽" : "")
         });
         this.refs.toast.show("进入夜晚闭眼阶段...");
-        addGameInfo(gamer.index + "自爆了", true);
+        addGameInfo(gamer.index + "自爆了" + (gameData.timeLine.id == 1 ? "，没有警徽" : ""), true);
         timeLimeMove();
-        if (gameData.timeLine.id == 1) { //如果在竞选警长阶段，则警徽丢失
-          this.refs.toast.show("没有警徽...");
-          addGameInfo("没有警徽", true);
+        if (gameData.timeLine.id == 2) { //如果前个阶段是竞选警长阶段，则警徽丢失
+          addGameInfo("自爆不能发言", true);
           timeLimeMove();
         }
       } else if ('vote' == field) {
@@ -226,7 +225,7 @@ export default class Main extends React.Component {
     });
   }
 
-  _info(){
+  _info () {
     this.setState({gamerInfo : getGameInfo()});
   }
 
