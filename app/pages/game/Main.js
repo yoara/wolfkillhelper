@@ -138,7 +138,7 @@ export default class Main extends React.Component {
             withMan = withMan + ga.index + " "
           }
           for (let ga of gamer) {
-            gamer.isAlive = false;
+            ga.isAlive = false;
             ga.action.push({
               timeLine : gameData.timeLine,
               time : time,
