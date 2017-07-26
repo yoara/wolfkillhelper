@@ -372,7 +372,8 @@ const styles = StyleSheet.create({
     fontSize : 16,
   },
   body_center : {
-    width : Constants.culWidthByPercent(0.7)
+    width : Constants.culWidthByPercent(0.7),
+    height : Constants.culHeightByPercent(0.85)
   },
   body_center_text : {
     marginTop : 3,
