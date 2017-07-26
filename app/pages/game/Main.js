@@ -27,7 +27,9 @@ export default class Main extends React.Component {
     super(props);
     this.state = {gamerInfo : getGameInfo()};
   }
-
+  componentWillUnmount(){
+    this.subscription.remove();
+  }
   componentDidMount () {
     this.subscription = DeviceEventEmitter.addListener(mainEventName, (data) => {
       let field = data.field;
