@@ -3,9 +3,10 @@
  */
 import React from 'react';
 import * as Constants from '../../common/Constants';
-import {gameData, timeLimeMove, addGameInfo, getGameInfo} from '../../data/GameData';
+import {gameData, timeLimeMove, addGameInfo, getGameInfo, gamerDead} from '../../data/GameData';
 import {roleMap} from '../../model/Role';
 import Toast from '../../common/util/Toast';
+import Confirm from "../../common/util/Confirm";
 import {
   View,
   Text,
@@ -27,9 +28,183 @@ export default class Main extends React.Component {
     super(props);
     this.state = {gamerInfo : getGameInfo()};
   }
-  componentWillUnmount(){
+
+  componentWillUnmount () {
     this.subscription.remove();
   }
+
+  _bombAction (data, time) {
+    let gamer = data.item;
+    //设置离场信息
+    gamerDead(gamer);
+    //时间轴记录信息
+    gamer.action.push({
+      timeLine : gameData.timeLine,
+      time : time,
+      action : '自爆了' + (gameData.timeLine.id == 1 ? "并炸掉了警徽" : "")
+    });
+    addGameInfo(gamer.index + "自爆了" + (gameData.timeLine.id == 1 ? "，没有警徽" : ""), true);
+    let callback = () => {
+      timeLimeMove();
+      if (gameData.timeLine.id == 2) { //如果前个阶段是竞选警长阶段，则警徽丢失
+        addGameInfo("自爆不能发言", true);
+        timeLimeMove();
+      }
+      this.refs.toast.show("进入夜晚闭眼阶段...");
+    };
+    this._deadWith(callback);
+  }
+
+  _voteAction (data, time) {
+    //出局Index:投票人Index数组
+    let outers = data.item;
+    let maxIndex = [];
+    let maxCount = 0;
+    for (let index in outers) {
+      let outerIndex = "";
+      let outerVoters = [];
+      for (let oi in outers[index]) {
+        outerVoters = outers[index][oi];
+        outerIndex = oi;
+      }
+
+      //计算投票人数量
+      if (outerIndex != "-1") {
+        if (outerVoters.length > maxCount) {
+          maxCount = outerVoters.length;
+          maxIndex = [];
+          maxIndex.push(outerIndex);
+        } else if (outerVoters.length == maxCount) {
+          maxIndex.push(outerIndex);
+        }
+      }
+      let withMan = outerVoters.join(" ");
+      //记录行为
+      if (outerIndex != "-1") {
+        gameData.gamers[parseInt(outerIndex) - 1].action.push({
+          timeLine : gameData.timeLine,
+          time : time,
+          action : "被以下玩家投票:" + withMan
+        });
+      }
+      for (let i in outerVoters) {
+        gameData.gamers[parseInt(outerVoters[i]) - 1].action.push({
+          timeLine : gameData.timeLine,
+          time : time,
+          action : "和" + withMan + (outerIndex == "-1" ? "弃票" : "投票给" + outerIndex)
+        });
+      }
+    }
+    //如果同票人大于1
+    if (maxIndex.length > 1) {
+      this.refs.toast.show("平票PK阶段...");
+      addGameInfo(maxIndex.join(" ") + "号玩家平票PK");
+    } else if (maxIndex.length == 0) {
+      addGameInfo("投票玩家全部弃票");
+    } else {
+      this.refs.toast.show(maxIndex[0] + "号玩家被归票");
+      addGameInfo(maxIndex[0] + "号玩家被归票", true);
+      //如果不是警长竞选阶段，则该玩家出局
+      if (gameData.timeLine.id > 1) {
+        gamerDead(gameData.gamers[parseInt(maxIndex[0]) - 1]);
+        gameData.gamers[parseInt(maxIndex[0]) - 1].action.push({
+          timeLine : gameData.timeLine,
+          time : time,
+          action : "归票出局"
+        });
+        let callback = () => {
+          addGameInfo(maxIndex[0] + "号玩家被投票出局死亡", false);
+          timeLimeMove();
+          this.refs.toast.show("进入夜晚闭眼阶段...");
+        };
+        this._deadWith(callback);
+      } else {  //警长竞选阶段，该玩家上警
+        gameData.gamers[parseInt(maxIndex[0]) - 1].isSheriff = true;
+        addGameInfo(maxIndex[0] + "号玩家被选为警长", true);
+        timeLimeMove();
+      }
+    }
+  }
+
+  _killAction (data, time) {
+    let gamer = data.item;
+    if (gamer.length == 0) {//平安夜
+      let withMan = "平安夜:";
+      for (let ga of gameData.gamers) {
+        if (ga.isAlive) {//设置平安夜信息
+          withMan = withMan + ga.index + " "
+        }
+      }
+      for (let ga of gameData.gamers) {
+        if (ga.isAlive) {//设置平安夜信息
+          ga.action.push({
+            timeLine : gameData.timeLine,
+            time : time,
+            action : withMan
+          });
+        }
+      }
+      addGameInfo(withMan, true);
+      timeLimeMove();
+    } else if (gamer.length == 1) {//单死
+      //设置离场信息
+      let oneGamer = gamer[0];
+      gamerDead(oneGamer);
+      //时间轴记录信息
+      oneGamer.action.push({
+        timeLine : gameData.timeLine,
+        time : time,
+        action : '夜晚单死'
+      });
+      let callback = () => {
+        addGameInfo(oneGamer.index + " 夜晚单死", true);
+        timeLimeMove();
+        this.refs.toast.show("进入夜晚闭眼阶段...");
+      };
+      this._deadWith(callback);
+    } else if (gamer.length == 2) {//双死
+      let withMan = "双死:";
+      for (let ga of gamer) {
+        withMan = withMan + ga.index + " "
+      }
+      for (let ga of gamer) {
+        gamerDead(ga);
+        ga.action.push({
+          timeLine : gameData.timeLine,
+          time : time,
+          action : withMan
+        });
+      }
+      //TODO 双死关联
+      let callback = () => {
+        addGameInfo(withMan + " 夜晚双死", true);
+        timeLimeMove();
+        this.refs.toast.show("进入夜晚闭眼阶段...");
+      };
+      this._deadWith(callback);
+    }
+    this.refs.toast.show("进入白天发言阶段...");
+  }
+
+  _deadWithAction (data, time) {
+    let gamer = data.item;
+    //设置离场信息
+    gamerDead(gamer);
+    //时间轴记录信息
+    gamer.action.push({
+      timeLine : gameData.timeLine,
+      time : time,
+      action : "关联" + gameData.deadOrder[gameData.deadOrder.length - 2].index + "玩家死亡，类型：" + data.deadWithType
+    });
+    gameData.deadOrder[gameData.deadOrder.length - 2].action.push({
+      timeLine : gameData.timeLine,
+      time : time,
+      action : "将" + gamer.index + "玩家带走，类型：" + data.deadWithType
+    });
+    addGameInfo(gamer.index + "被关联出局了，死亡类型：" + data.deadWithType, true);
+    data.callback();
+  }
+
   componentDidMount () {
     this.subscription = DeviceEventEmitter.addListener(mainEventName, (data) => {
       let field = data.field;
@@ -37,127 +212,13 @@ export default class Main extends React.Component {
       let date = new Date();
       let time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
       if ('bomb' == field) {
-        let gamer = data.item;
-        //设置离场信息
-        gamer.isAlive = false;
-        //时间轴记录信息
-        gamer.action.push({
-          timeLine : gameData.timeLine,
-          time : time,
-          action : '自爆了' + (gameData.timeLine.id == 1 ? "并炸掉了警徽" : "")
-        });
-        this.refs.toast.show("进入夜晚闭眼阶段...");
-        addGameInfo(gamer.index + "自爆了" + (gameData.timeLine.id == 1 ? "，没有警徽" : ""), true);
-        timeLimeMove();
-        if (gameData.timeLine.id == 2) { //如果前个阶段是竞选警长阶段，则警徽丢失
-          addGameInfo("自爆不能发言", true);
-          timeLimeMove();
-        }
+        this._bombAction(data, time);
       } else if ('vote' == field) {
-        //出局Index:投票人Index数组
-        let outers = data.item;
-        let maxIndex = [];
-        let maxCount = 0;
-        for (let index in outers) {
-          let outerIndex = "";
-          let outerVoters = [];
-          for (let oi in outers[index]) {
-            outerVoters = outers[index][oi];
-            outerIndex = oi;
-          }
-
-          //计算投票人数量
-          if (outerIndex != "-1") {
-            if (outerVoters.length > maxCount) {
-              maxCount = outerVoters.length;
-              maxIndex = [];
-              maxIndex.push(outerIndex);
-            } else if (outerVoters.length == maxCount) {
-              maxIndex.push(outerIndex);
-            }
-          }
-          let withMan = outerVoters.join(" ");
-          //记录行为
-          if (outerIndex != "-1") {
-            gameData.gamers[parseInt(outerIndex) - 1].action.push({
-              timeLine : gameData.timeLine,
-              time : time,
-              action : "被以下玩家投票:" + withMan
-            });
-          }
-          for (let i in outerVoters) {
-            gameData.gamers[parseInt(outerVoters[i]) - 1].action.push({
-              timeLine : gameData.timeLine,
-              time : time,
-              action : "和" + withMan + (outerIndex == "-1" ? "弃票" : "投票给" + outerIndex)
-            });
-          }
-        }
-        //如果通票人大于1
-        if (maxIndex.length > 1) {
-          this.refs.toast.show("平票PK阶段...");
-          addGameInfo(maxIndex.join(" ") + "号玩家平票PK");
-        } else if (maxIndex.length == 0) {
-          addGameInfo("投票玩家全部弃票");
-        } else {
-          this.refs.toast.show(maxIndex[0] + "号玩家被归票");
-          addGameInfo(maxIndex[0] + "号玩家被归票", true);
-          //如果不是警长竞选阶段，则该玩家出局
-          gameData.gamers[parseInt(maxIndex[0]) - 1].isAlive = false;
-          gameData.gamers[parseInt(maxIndex[0]) - 1].action.push({
-            timeLine : gameData.timeLine,
-            time : time,
-            action : "归票出局"
-          });
-          timeLimeMove();
-        }
+        this._voteAction(data, time);
       } else if ('kill' == field) {
-        let gamer = data.item;
-        if (gamer.length == 0) {//平安夜
-          let withMan = "平安夜:";
-          for (let ga of gameData.gamers) {
-            if (ga.isAlive) {//设置平安夜信息
-              withMan = withMan + ga.index + " "
-            }
-          }
-          for (let ga of gameData.gamers) {
-            if (ga.isAlive) {//设置平安夜信息
-              ga.action.push({
-                timeLine : gameData.timeLine,
-                time : time,
-                action : withMan
-              });
-            }
-          }
-          addGameInfo(withMan, true);
-        } else if (gamer.length == 1) {//单死
-          //设置离场信息
-          let oneGamer = gamer[0];
-          oneGamer.isAlive = false;
-          //时间轴记录信息
-          oneGamer.action.push({
-            timeLine : gameData.timeLine,
-            time : time,
-            action : '夜晚单死'
-          });
-          addGameInfo(oneGamer.index + " 夜晚单死", true);
-        } else if (gamer.length == 2) {//双死
-          let withMan = "双死:";
-          for (let ga of gamer) {
-            withMan = withMan + ga.index + " "
-          }
-          for (let ga of gamer) {
-            ga.isAlive = false;
-            ga.action.push({
-              timeLine : gameData.timeLine,
-              time : time,
-              action : withMan
-            });
-          }
-          addGameInfo(withMan + " 夜晚双死", true);
-        }
-        this.refs.toast.show("进入白天发言阶段...");
-        timeLimeMove();
+        this._killAction(data, time);
+      } else if ('deadWith' == field) {
+        this._deadWithAction(data, time);
       }
       this.setState({gamerInfo : getGameInfo()});
     });
@@ -269,6 +330,22 @@ export default class Main extends React.Component {
     );
   }
 
+  _deadWith (callback) {
+    let rejectFunc = () => {
+      callback();
+    };
+    let approveFunc = () => {
+      this.props.navigation.navigate('ChooseCircleView', {
+        dataField : 'deadWith',
+        entityList : gameData.gamers,
+        eventName : mainEventName,
+        title : '自爆',
+        callback : callback
+      });
+    };
+    this.refs.confirm.open(rejectFunc, approveFunc);
+  }
+
   render () {
     return (
       <View style={styles.container}>
@@ -278,35 +355,35 @@ export default class Main extends React.Component {
             onPress={() => {
               this._vote()
             }}>
-            <Text style={{color : '#ffffff'}}>投票</Text>
+            <Text style={styles.headerButtonText}>投票</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => {
               this._voteNoBody()
             }}>
-            <Text style={{color : '#ffffff'}}>平安日</Text>
+            <Text style={styles.headerButtonText}>平安日</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => {
               this._bomb()
             }}>
-            <Text style={{color : '#ffffff'}}>自爆</Text>
+            <Text style={styles.headerButtonText}>自爆</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => {
               this._kill()
             }}>
-            <Text style={{color : '#ffffff'}}>狼刀</Text>
+            <Text style={styles.headerButtonText}>狼刀</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.headerButton}
             onPress={() => {
               this._info()
             }}>
-            <Text style={{color : '#ffffff'}}>信息</Text>
+            <Text style={styles.headerButtonText}>信息</Text>
           </TouchableOpacity>
         </View>
 
@@ -328,6 +405,13 @@ export default class Main extends React.Component {
           </View>
         </View>
         <Toast ref="toast"/>
+        <Confirm
+          ref="confirm"
+          title='请您确认'
+          msg='是否发动关联死亡'
+          btnRejectText='不关联'
+          btnApproveText='关联'
+        />
       </View>
     );
   }
@@ -341,19 +425,24 @@ const styles = StyleSheet.create({
   headerContainer : {
     backgroundColor : '#ffffff',
     height : Constants.culHeightByPercent(0.1),
-    justifyContent : 'space-around',
-    alignItems : 'center',
-    flexDirection : 'row'
+    flexDirection : 'row',
+    flexWrap : 'wrap',
+    alignItems:'center'
   },
   headerButton : {
     justifyContent : 'center',
     alignItems : 'center',
-    width : Constants.culHeightByPercent(0.08),
-    height : Constants.culHeightByPercent(0.08),
+    width : Constants.culWidthByPercent(0.15),
+    height : Constants.culHeightByPercent(0.03),
     backgroundColor : '#616161',
     borderColor : '#616161',
-    borderRadius : 28,
-    borderWidth : 1
+    borderWidth : 1,
+    marginLeft:Constants.culWidthByPercent(0.025),
+    marginRight:Constants.culWidthByPercent(0.025),
+  },
+  headerButtonText : {
+    color : '#ffffff',
+    fontSize : 14
   },
   bodyContainer : {
     borderTopWidth : Constants.culHeight(1),

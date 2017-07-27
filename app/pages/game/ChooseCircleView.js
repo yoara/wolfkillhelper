@@ -22,6 +22,7 @@ export default class ChooseView extends React.Component {
     this.contentViewStyle = this.props.navigation.state.params.contentViewStyle;
     this.contentTextStyle = this.props.navigation.state.params.contentTextStyle;
     this.customView = this.props.navigation.state.params.customView;
+    this.callback = this.props.navigation.state.params.callback;
     this.state = {};
     this.headerChoice = {};
     this.bodyChoice = {};
@@ -105,7 +106,7 @@ export default class ChooseView extends React.Component {
   }
 
   _bomb () {
-    if (Object.keys(this.headerChoice).length == 0) {
+    if (Object.keys(this.headerChoice).length != 1) {
       Alert.alert("请选择一个玩家自爆");
       return;
     }
@@ -200,6 +201,19 @@ export default class ChooseView extends React.Component {
     this._returnMain(data);
   }
 
+  //关联死亡
+  _deadWith(message,type){
+    if (Object.keys(this.headerChoice).length != 1) {
+      Alert.alert(message);
+      return;
+    }
+    let data = {
+      item : this._getHeaderChoiceData()[0],
+      deadWithType : type,
+      callback:this.callback
+    };
+    this._returnMain(data);
+  }
 
   render () {
     return (
@@ -277,6 +291,43 @@ export default class ChooseView extends React.Component {
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>结束</Text>
+                </TouchableHighlight>
+              </View>
+              : <View/>
+          }
+          {
+            this.dataField == 'deadWith' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._deadWith("请选择一个玩家开枪","gun")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>开枪</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._deadWith("请选择一个玩家殉情","love")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>殉情</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._deadWith("请选择一个玩家魅惑","bitch")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>魅惑</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._deadWith("请选择一个玩家白狼杀","whiteWolf")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>白狼杀</Text>
                 </TouchableHighlight>
               </View>
               : <View/>
