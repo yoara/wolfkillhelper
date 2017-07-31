@@ -1,14 +1,14 @@
 /**
  * Created by yoara on 2017/7/25.
  */
-const NIGHT = {
+const JZJX = {
   id : 0,
+  desc : '警长竞选'
+};
+const NIGHT = {
+  id : 1,
   desc : '首夜',
   isNight : true
-};
-const JZJX = {
-  id : 1,
-  desc : '警长竞选'
 };
 const DAY_1 = {
   id : 2,
@@ -57,13 +57,13 @@ const NIGHT_5 = {
 };
 
 const timeLineList = [
-  NIGHT, JZJX, DAY_1, NIGHT_1,
+  JZJX, NIGHT, DAY_1, NIGHT_1,
   DAY_2, NIGHT_2, DAY_3, NIGHT_3,
   DAY_4, NIGHT_4, DAY_5, NIGHT_5
 ]
 let timeIndex = 0;
 function init () {
-  timeIndex = 1;
+  timeIndex = 0;
   return now();
 }
 

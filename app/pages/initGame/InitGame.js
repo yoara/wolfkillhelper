@@ -5,7 +5,7 @@ import React from 'react';
 import * as Constants from '../../common/Constants';
 import {boards} from './StandardBoard';
 import {roleList} from '../../model/Role';
-import {gameData,initGameData} from '../../data/GameData';
+import {gameData, initGameData} from '../../data/GameData';
 
 import {
   View,
@@ -26,7 +26,8 @@ export default class InitGame extends React.Component {
     this.state = {
       board : '请选择板子',
       myRole : '我的角色',
-      hasSheriff : true
+      hasSheriff : true,
+      firstDayBombHasSheriff : false,
     };
   }
 
@@ -88,10 +89,11 @@ export default class InitGame extends React.Component {
       Alert.alert("请先选择角色");
       return;
     }
-    let config= {
+    let config = {
       roles : this.roles,
       myRole : this.myRole,
       hasSheriff : this.state.hasSheriff,
+      firstDayBombHasSheriff : this.state.firstDayBombHasSheriff,
     }
     initGameData(config);
     this.props.navigation.navigate('Main', {});
@@ -132,6 +134,15 @@ export default class InitGame extends React.Component {
           leftText='是否包含警长'
         />
 
+        <CheckBox
+          style={{flex : 1, padding : 10}}
+          onClick={() => this.setState({
+            firstDayBombHasSheriff : !this.state.firstDayBombHasSheriff
+          })}
+          isChecked={this.state.firstDayBombHasSheriff}
+          leftTextStyle={styles.checkBoxText}
+          leftText='首页自爆是否还有警徽'
+        />
 
         <TouchableHighlight style={[styles.submitButton]}
                             onPress={() => this._startGame()} underlayColor="#E1F6FF">
@@ -191,6 +202,6 @@ const styles = StyleSheet.create({
     borderRadius : 5,
     alignItems : 'center',
     justifyContent : 'center',
-    marginTop:Constants.culHeight(200)
+    marginTop : Constants.culHeight(200)
   },
 });

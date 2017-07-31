@@ -22,7 +22,6 @@ export default class ChooseView extends React.Component {
     this.contentViewStyle = this.props.navigation.state.params.contentViewStyle;
     this.contentTextStyle = this.props.navigation.state.params.contentTextStyle;
     this.customView = this.props.navigation.state.params.customView;
-    this.callback = this.props.navigation.state.params.callback;
     this.state = {};
     this.headerChoice = {};
     this.bodyChoice = {};
@@ -31,6 +30,8 @@ export default class ChooseView extends React.Component {
 
   static navigationOptions = ({navigation}) => ({
     title : navigation.state.params.title || '选择',
+    headerLeft : null,
+    gesturesEnabled : false
   });
 
   _headerChoose (item) {
@@ -154,13 +155,13 @@ export default class ChooseView extends React.Component {
 
   _vote () {
     if (Object.keys(this.headerChoice).length == 0
-        &&Object.keys(this.bodyChoice).length == 0) {
+      && Object.keys(this.bodyChoice).length == 0) {
       Alert.alert("请选择投票结果");
       return;
     }
 
     if (Object.keys(this.headerChoice).length > 0
-      &&Object.keys(this.bodyChoice).length == 0) {
+      && Object.keys(this.bodyChoice).length == 0) {
       Alert.alert("请选择投票玩家");
       return;
     }
@@ -191,7 +192,7 @@ export default class ChooseView extends React.Component {
   }
 
   _voteFinish () {
-    if(this.voteInfo.length==0){
+    if (this.voteInfo.length == 0) {
       Alert.alert("请录入投票结果");
       return;
     }
@@ -202,7 +203,7 @@ export default class ChooseView extends React.Component {
   }
 
   //关联死亡
-  _deadWith(message,type){
+  _deadWith (message, type) {
     if (Object.keys(this.headerChoice).length != 1) {
       Alert.alert(message);
       return;
@@ -210,7 +211,6 @@ export default class ChooseView extends React.Component {
     let data = {
       item : this._getHeaderChoiceData()[0],
       deadWithType : type,
-      callback:this.callback
     };
     this._returnMain(data);
   }
@@ -300,7 +300,7 @@ export default class ChooseView extends React.Component {
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._deadWith("请选择一个玩家开枪","gun")}
+                  onPress={() => this._deadWith("请选择一个玩家开枪", "gun")}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>开枪</Text>
@@ -308,7 +308,7 @@ export default class ChooseView extends React.Component {
 
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._deadWith("请选择一个玩家殉情","love")}
+                  onPress={() => this._deadWith("请选择一个玩家殉情", "love")}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>殉情</Text>
@@ -316,7 +316,7 @@ export default class ChooseView extends React.Component {
 
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._deadWith("请选择一个玩家魅惑","bitch")}
+                  onPress={() => this._deadWith("请选择一个玩家魅惑", "bitch")}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>魅惑</Text>
@@ -324,7 +324,7 @@ export default class ChooseView extends React.Component {
 
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._deadWith("请选择一个玩家白狼杀","whiteWolf")}
+                  onPress={() => this._deadWith("请选择一个玩家白狼杀", "whiteWolf")}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>白狼杀</Text>
