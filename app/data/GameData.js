@@ -50,7 +50,7 @@ function timeLineMove () {
 function addGameInfo (text, newline = false) {
   gameData.gameInfoText = gameData.gameInfoText + "【" + gameData.timeLine.desc + "】" +
     ":\r\n" + text + (newline ? ("\r\n\r\n进入【" + next().desc) +
-      "】........\r\n" : "") + "\r\n";
+      "】........" : "") + "\r\n";
 }
 
 function getGameInfo () {
@@ -69,6 +69,7 @@ function popActionStack () {
     return;
   }
   if (action && action.needTimeLineMove) {
+    addGameInfo("游戏进入下一阶段", true);
     timeLineMove();
     //如果狼人自爆且前个阶段是竞选警长阶段，则警徽丢失
     if (gameData.timeLine.id == 2 && gameData.firstDayBomb) {
@@ -80,6 +81,8 @@ function popActionStack () {
     gameData.mainConfig.mainView.setState({gamerInfo : getGameInfo()});
   }
 }
+
+const waiting = [];
 /**
  * gamer 主操作玩家
  * gamerWith 被动玩家
@@ -112,10 +115,21 @@ function gamerAction (actionParam) {
   }
   if (actionParam.action.checkDeadWith) {
     if (actionParam.action.needTimeLineMove) {
+      if (actionStack.length > 0 && actionStack[0].id == actionParam.action.id) {
+        //异常情况下处理
+        actionStack = [];
+      }
       actionStack.push(actionParam.action);
     }
     let rejectFunc = () => {
       popActionStack();
+      if (waiting.length > 0) {
+        let config = waiting.pop();
+        if (config) {
+          gameData.mainConfig.notify_confirm.open(
+            config.rejectFunc, config.approveFunc, config.title, config.msg);
+        }
+      }
     };
     let approveFunc = () => {
       gameData.mainConfig.mainView.props.navigation.navigate('ChooseCircleView', {
@@ -125,13 +139,32 @@ function gamerAction (actionParam) {
         title : gamers[0].index + "号玩家" + actionParam.action.name + "欲带走：",
       });
     };
-    gameData.mainConfig.notify_confirm.open(rejectFunc, approveFunc);
+    let title = gamers[0].index + "号玩家关联死亡";
+    let msg = "是否要执行关联死亡";
+    if (gameData.mainConfig.notify_confirm.hasOpen) {
+      let config = {
+        rejectFunc : rejectFunc,
+        approveFunc : approveFunc,
+        title : title,
+        msg : msg,
+      };
+      waiting.push(config);
+    } else {
+      gameData.mainConfig.notify_confirm.open(
+        rejectFunc, approveFunc, title, msg);
+    }
   } else {
     if (actionParam.action.group) {
-      addGameInfo(actionParam.withMan);
+      addGameInfo(actionParam.withMan, true);
       timeLineMove();
     } else {
       popActionStack();
+      if (waiting.length > 0) {
+        let config = waiting.pop();
+        if (config) {
+          gameData.mainConfig.notify_confirm.open(config.rejectFunc, config.approveFunc, config.title, config.msg);
+        }
+      }
     }
   }
 }

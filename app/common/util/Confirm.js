@@ -44,11 +44,14 @@ export default class Confirm extends Component {
     swap : true, // swap为true，默认值，即 确认事件按钮在右边，取消按钮及事件在左边
   };
 
-  open = (rejectFunc,approveFunc) => {
+  open = (rejectFunc, approveFunc, title = null, msg = null) => {
     this.rejectFunc = rejectFunc;
     this.approveFunc = approveFunc;
+    this.hasOpen = true;
     this.setState({
-      flag : true
+      flag : true,
+      title : title,
+      msg : msg
     });
   };
 
@@ -57,8 +60,9 @@ export default class Confirm extends Component {
    * @private
    */
   _onRejectPress = () => {
+    this.hasOpen = false;
     this.setState({
-      flag : false
+      flag : false,
     });
     this.rejectFunc();
   };
@@ -68,6 +72,7 @@ export default class Confirm extends Component {
    * @private
    */
   _onApprovePress = () => {
+    this.hasOpen = false;
     this.setState({
       flag : false
     });
@@ -86,10 +91,11 @@ export default class Confirm extends Component {
         <View style={styles.confirmModal}>
           <View style={styles.confirm}>
             <View style={styles.title}>
-              <Text style={[styles.titleCon, {textAlign : this.props.textAlign}]}>{this.props.title}</Text>
+              <Text
+                style={[styles.titleCon, {textAlign : this.props.textAlign}]}>{this.state.title || this.props.title}</Text>
             </View>
             <View style={styles.content}>
-              <Text style={[styles.text, {textAlign : this.props.textAlign}]}>{this.props.msg}</Text>
+              <Text style={[styles.text, {textAlign : this.props.textAlign}]}>{this.state.msg || this.props.msg}</Text>
             </View>
             <View style={styles.btn}>
               <TouchableHighlight underlayColor='#eee'

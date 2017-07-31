@@ -136,7 +136,7 @@ export default class Main extends React.Component {
         });
       } else {  //警长竞选阶段，该玩家上警
         ga.isSheriff = true;
-        addGameInfo(ga.index + "号玩家被选为警长", true);
+        addGameInfo(ga.index + "号玩家被选为警长");
         gamerAction({
           gamer : ga,
           action : Action.voteEdSheriff,
@@ -162,11 +162,11 @@ export default class Main extends React.Component {
         action : Action.peaceNight,
         withMan : withMan,
       });
-      addGameInfo("平安夜:" + withMan, true);
+      addGameInfo("平安夜:" + withMan);
     } else if (gamer.length == 1) {//单死
       let oneGamer = gamer[0];
       gamerDead(oneGamer);
-      addGameInfo(oneGamer.index + "号玩家夜晚单死", true);
+      addGameInfo(oneGamer.index + "号玩家夜晚单死");
       gamerAction({
         gamer : oneGamer,
         action : Action.oneDeadNight,
@@ -178,13 +178,14 @@ export default class Main extends React.Component {
       }
       for (let ga of gamer) {
         gamerDead(ga);
+        gamerAction({
+          gamer : ga,
+          action : Action.twoDeadNight,
+          withMan : withMan,
+        });
       }
-      gamerAction({
-        gamer : gamer,
-        action : Action.twoDeadNight,
-        withMan : withMan,
-      });
-      addGameInfo(withMan + " 夜晚双死", true);
+
+      addGameInfo(withMan + " 夜晚双死");
     }
   }
 

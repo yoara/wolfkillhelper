@@ -97,7 +97,6 @@ const twoDeadNight = {
   name : '夜晚双死',
   checkDeadWith : true,
   needTimeLineMove : true,
-  group : true,
   desc : (actionInfo) => {
     return actionInfo.gamer.index + "号玩家与" + actionInfo.withMan + "号玩家夜晚双死";
   },
