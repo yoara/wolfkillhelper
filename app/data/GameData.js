@@ -115,10 +115,6 @@ function gamerAction (actionParam) {
   }
   if (actionParam.action.checkDeadWith) {
     if (actionParam.action.needTimeLineMove) {
-      if (actionStack.length > 0 && actionStack[0].id == actionParam.action.id) {
-        //异常情况下处理
-        actionStack = [];
-      }
       actionStack.push(actionParam.action);
     }
     let rejectFunc = () => {
@@ -136,7 +132,7 @@ function gamerAction (actionParam) {
         dataField : 'deadWith',
         entityList : gameData.gamers,
         eventName : gameData.mainConfig.mainEventName,
-        title : gamers[0].index + "号玩家" + actionParam.action.name + "欲带走：",
+        title : gamers[0].index + "号玩家" + actionParam.action.name + "可带走：",
       });
     };
     let title = gamers[0].index + "号玩家关联死亡";
@@ -154,18 +150,23 @@ function gamerAction (actionParam) {
         rejectFunc, approveFunc, title, msg);
     }
   } else {
-    if (actionParam.action.group) {
-      addGameInfo(actionParam.withMan, true);
-      timeLineMove();
-    } else {
-      popActionStack();
-      if (waiting.length > 0) {
-        let config = waiting.pop();
-        if (config) {
-          gameData.mainConfig.notify_confirm.open(config.rejectFunc, config.approveFunc, config.title, config.msg);
-        }
+    if(actionParam.action.needTimeLineMove){
+      if (actionParam.action.group) {
+        addGameInfo(actionParam.withMan, true);
+      }else{
+        addGameInfo("游戏进入下一阶段", true);
       }
+      timeLineMove();
     }
+    // else {
+    //   popActionStack();
+    //   if (waiting.length > 0) {
+    //     let config = waiting.pop();
+    //     if (config) {
+    //       gameData.mainConfig.notify_confirm.open(config.rejectFunc, config.approveFunc, config.title, config.msg);
+    //     }
+    //   }
+    // }
   }
 }
 /**

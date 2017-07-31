@@ -58,7 +58,7 @@ export default class Main extends React.Component {
     let gamer = data.item;
     gamerDead(gamer);
     addGameInfo(gamer.index + "号玩家自爆了" +
-      (gameData.timeLine.id == 0 && !gameData.gameConfig.firstDayBombHasSheriff ? "，没有警徽" : ""),true);
+      (gameData.timeLine.id == 0 && !gameData.gameConfig.firstDayBombHasSheriff ? "，没有警徽" : ""));
     if(gameData.timeLine.id == 0){
       gameData.firstDayBomb = true;
     }
@@ -441,7 +441,7 @@ const styles = StyleSheet.create({
   },
   body_center : {
     width : Constants.culWidthByPercent(0.7),
-    height : Constants.culHeightByPercent(0.85)
+    height : Constants.culHeightByPercent(0.7)
   },
   body_center_text : {
     marginTop : 3,

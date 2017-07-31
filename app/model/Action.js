@@ -76,6 +76,7 @@ const peaceNight = {
   id : 7,
   name : '平安夜',
   checkDeadWith : false,
+  needTimeLineMove : true,
   group : true,
   desc : (actionInfo) => {
     return "平安夜:" + actionInfo.withMan;
@@ -106,6 +107,7 @@ const peaceDay = {
   id : 10,
   name : '平安日',
   checkDeadWith : false,
+  needTimeLineMove : true,
   group : true,
   desc : (actionInfo) => {
     return "平票结束:" + actionInfo.withMan;
@@ -115,7 +117,6 @@ const peaceDay = {
 const love = {
   id : 11,
   name : '殉情',
-  checkDeadWith : false,
   desc : (actionInfo) => {
     let msg = actionInfo.gamer.index + "号玩家殉情链子了" + actionInfo.gamerWith.index + "号玩家";
     addGameInfo(msg);
@@ -135,7 +136,6 @@ const loveEd = {
 const bitch = {
   id : 13,
   name : '魅惑',
-  checkDeadWith : false,
   desc : (actionInfo) => {
     let msg = actionInfo.gamer.index + "号玩家魅惑了" + actionInfo.gamerWith.index + "号玩家";
     addGameInfo(msg);
@@ -155,7 +155,6 @@ const bitchEd = {
 const whiteWolf = {
   id : 15,
   name : '白狼杀',
-  checkDeadWith : false,
   desc : (actionInfo) => {
     let msg = actionInfo.gamer.index + "号玩家白狼王，杀死了" + actionInfo.gamerWith.index + "号玩家";
     addGameInfo(msg);
