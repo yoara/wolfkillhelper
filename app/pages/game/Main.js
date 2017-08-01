@@ -453,6 +453,8 @@ export default class Main extends React.Component {
               </Text>
             </ScrollView>
             <View style={styles.headerContainer}>
+              <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
+              (this.state.gamerIndex?this.state.gamerIndex+"号":"未选择") + "玩家】"}</Text>
               <TouchableOpacity
                 style={styles.headerButton}
                 onPress={() => {
@@ -506,8 +508,8 @@ const styles = StyleSheet.create({
     alignItems : 'center',
     width : Constants.culWidthByPercent(0.15),
     height : Constants.culHeightByPercent(0.03),
-    backgroundColor : '#616161',
-    borderColor : '#616161',
+    backgroundColor : '#f39800',
+    borderColor : '#f39800',
     borderWidth : 1,
     marginLeft : Constants.culWidthByPercent(0.025),
     marginRight : Constants.culWidthByPercent(0.025),
