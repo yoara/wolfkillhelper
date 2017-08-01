@@ -29,9 +29,9 @@ function initGameData (config) {
       isAlive : true,
       isSheriff : false,
       action : [],
-      sign : {},
+      sign : null,
       index : index,
-      text : index
+      text : index + (gameData.gameConfig.myIndex == index ? gameData.gameConfig.myRole.shortName : "")
     });
   }
   //如果没有警长，则跳过警长竞选阶段
@@ -63,6 +63,9 @@ function gamerDead (gamer) {
 }
 
 let actionStack = [];
+function resetActionStack () {
+  actionStack = [];
+}
 function popActionStack () {
   let action = actionStack.pop();
   if (actionStack.length > 0) {   //一次stack有且仅有一次timeMove
@@ -150,12 +153,11 @@ function gamerAction (actionParam) {
         rejectFunc, approveFunc, title, msg);
     }
   } else {
-    if(actionParam.action.needTimeLineMove){
+    if (actionParam.action.needTimeLineMove) {
       if (actionParam.action.group) {
-        addGameInfo(actionParam.withMan, true);
-      }else{
-        addGameInfo("游戏进入下一阶段", true);
+        addGameInfo(actionParam.action.desc(actionParam));
       }
+      addGameInfo("游戏进入下一阶段", true);
       timeLineMove();
     }
     // else {
@@ -174,6 +176,7 @@ function gamerAction (actionParam) {
  *    {
  *      roles//角色板子
  *      myRole//我的角色
+ *      myIndex//我的序号
  *      hasSheriff//是否包含警长
  *      timeLine//当前游戏进程
  *    }
@@ -211,4 +214,5 @@ export {
   getGameInfo,
   gamerDead,
   gamerAction,
+  resetActionStack
 }

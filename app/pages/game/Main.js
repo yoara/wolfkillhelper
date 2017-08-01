@@ -3,10 +3,11 @@
  */
 import React from 'react';
 import * as Constants from '../../common/Constants';
-import {gameData, addGameInfo, getGameInfo, gamerDead, gamerAction} from '../../data/GameData';
+import {gameData, addGameInfo, getGameInfo, gamerDead, gamerAction, resetActionStack} from '../../data/GameData';
 import * as Action from '../../model/Action';
 import Toast from '../../common/util/Toast';
 import Confirm from "../../common/util/Confirm";
+import {roleList} from '../../model/Role';
 import {
   View,
   Text,
@@ -37,16 +38,29 @@ export default class Main extends React.Component {
 
     this.subscription = DeviceEventEmitter.addListener(mainEventName, (data) => {
       let field = data.field;
+      let showInfoType = "main";
       if ('bomb' == field) {
+        resetActionStack();
         this._bombAction(data);
       } else if ('vote' == field) {
         this._voteAction(data);
       } else if ('kill' == field) {
+        resetActionStack();
         this._killAction(data);
       } else if ('deadWith' == field) {
         this._deadWithAction(data);
+      } else if ('sign' == field) {
+        this._signAction(data);
+        showInfoType = 'gamer';
+      } else if ('behaviour' == field) {
+        this._behaviourAction(data);
+        showInfoType = 'gamer';
       }
-      this.setState({gamerInfo : getGameInfo()});
+      if (showInfoType == 'main') {
+        this.setState({gamerInfo : getGameInfo()});
+      } else if (showInfoType == 'gamer') {
+        this._showGamerInfo(gameData.gamers[this.state.gamerIndex - 1]);
+      }
     });
   }
 
@@ -59,7 +73,7 @@ export default class Main extends React.Component {
     gamerDead(gamer);
     addGameInfo(gamer.index + "号玩家自爆了" +
       (gameData.timeLine.id == 0 && !gameData.gameConfig.firstDayBombHasSheriff ? "，没有警徽" : ""));
-    if(gameData.timeLine.id == 0){
+    if (gameData.timeLine.id == 0) {
       gameData.firstDayBomb = true;
     }
     gamerAction({
@@ -117,8 +131,8 @@ export default class Main extends React.Component {
     } else {
       let withMan = "";
       for (let index in outers) {
-        for(let outerI in outers[index]){
-          if(outerI==maxIndex[0]){
+        for (let outerI in outers[index]) {
+          if (outerI == maxIndex[0]) {
             withMan = outers[index][outerI].join(" ")
           }
         }
@@ -162,7 +176,6 @@ export default class Main extends React.Component {
         action : Action.peaceNight,
         withMan : withMan,
       });
-      addGameInfo("平安夜:" + withMan);
     } else if (gamer.length == 1) {//单死
       let oneGamer = gamer[0];
       gamerDead(oneGamer);
@@ -184,7 +197,6 @@ export default class Main extends React.Component {
           withMan : withMan,
         });
       }
-
       addGameInfo(withMan + " 夜晚双死");
     }
   }
@@ -285,7 +297,7 @@ export default class Main extends React.Component {
   }
 
   _info () {
-    this.setState({gamerInfo : getGameInfo()});
+    this.setState({gamerInfo : getGameInfo(), gamerIndex : null});
   }
 
   _showGamerInfo (gamer) {
@@ -300,7 +312,7 @@ export default class Main extends React.Component {
       }
       gamerInfo = gamerInfo + item.action.desc + "\r\n";
     }
-    this.setState({gamerInfo : gamerInfo});
+    this.setState({gamerInfo : gamerInfo, gamerIndex : gamer.index});
   }
 
   _edgeWindow (gamer, i, startIndex, endIndex) {
@@ -313,9 +325,78 @@ export default class Main extends React.Component {
         style={[styles.body_edge_window, !gamer.isAlive && styles.body_edge_window_readonly]}
         onPress={() => this._showGamerInfo(gamer)}
       >
-        <Text style={styles.body_edge_window_text}>{gamer.text + (gamer.isAlive ? "" : "死亡")}</Text>
+        <Text
+          style={styles.body_edge_window_text}>
+          {
+            gamer.text + (gamer.sign ? "\r\n(" + gamer.sign + ")" : "") +
+            (gamer.isAlive ? "" : "\r\n(死亡)")
+          }</Text>
       </TouchableOpacity>
     );
+  }
+
+  _sign () {
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+
+    this.props.navigation.navigate('ChooseView', {
+      dataField : 'sign',
+      entityList : roleList,
+      eventName : mainEventName
+    });
+  }
+
+  _signAction (data) {
+    let role = data.item.role;
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    gamer.sign = role.shortName;
+  }
+
+  _behaviour () {
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+
+    this.props.navigation.navigate('ChooseCircleView', {
+      dataField : 'behaviour',
+      entityList : gameData.gamers,
+      eventName : mainEventName,
+      title : '行为'
+    });
+  }
+
+  _behaviourAction (data) {
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    let to = data.item;
+    let action;
+    let actionTo;
+    if (data.behaviourType == 'tallTo') {
+      action = Action.tallTo;
+      actionTo = Action.tallToEd;
+    } else {
+      action = Action.challengeTo;
+      actionTo = Action.challengeToEd;
+    }
+    let withMan = "";
+    for (let ga of to) {
+      withMan = withMan + ga.index + " "
+    }
+    for (let ga of to) {
+      gamerAction({
+        gamer : ga,
+        action : actionTo,
+        withMan : withMan,
+        gamerWith : gamer
+      });
+    }
+    gamerAction({
+      gamer : gamer,
+      action : action,
+      withMan : withMan,
+    });
   }
 
   render () {
@@ -365,11 +446,30 @@ export default class Main extends React.Component {
               gameData.gamers.map((gamer, i) => this._edgeWindow(gamer, i, 0, 5))
             }
           </View>
-          <ScrollView style={styles.body_center}>
-            <Text style={styles.body_center_text}>
-              {this.state.gamerInfo}
-            </Text>
-          </ScrollView>
+          <View style={styles.body_center}>
+            <ScrollView style={styles.body_scroll}>
+              <Text style={styles.body_center_text}>
+                {this.state.gamerInfo}
+              </Text>
+            </ScrollView>
+            <View style={styles.headerContainer}>
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => {
+                  this._sign()
+                }}>
+                <Text style={styles.headerButtonText}>标记</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={() => {
+                  this._behaviour()
+                }}>
+                <Text style={styles.headerButtonText}>行为</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
           <View style={[styles.body_edge, {borderLeftWidth : 1, borderLeftColor : '#e1e1e1'}]}>
             {
               gameData.gamers.map((gamer, i) => this._edgeWindow(gamer, i, 6, 11))
@@ -442,6 +542,11 @@ const styles = StyleSheet.create({
   body_center : {
     width : Constants.culWidthByPercent(0.7),
     height : Constants.culHeightByPercent(0.7)
+  },
+  body_scroll : {
+    height : Constants.culHeightByPercent(0.6),
+    borderBottomWidth : 1,
+    borderBottomColor : '#c9c9c9'
   },
   body_center_text : {
     marginTop : 3,

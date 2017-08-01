@@ -25,6 +25,7 @@ export default class InitGame extends React.Component {
     super(props);
     this.state = {
       board : '请选择板子',
+      myIndex : '请选择序号',
       myRole : '我的角色',
       hasSheriff : true,
       firstDayBombHasSheriff : false,
@@ -46,6 +47,10 @@ export default class InitGame extends React.Component {
         let role = data.item.role;
         this.setState({myRole : role.name});
         this.myRole = role;
+      } else if ('myIndex' == field) {
+        let myIndex = data.item.index;
+        this.setState({myIndex : myIndex});
+        this.myIndex = myIndex;
       }
     });
   }
@@ -66,9 +71,22 @@ export default class InitGame extends React.Component {
     });
   }
 
+  _chooseMyIndex () {
+    this.props.navigation.navigate('ChooseView', {
+      dataField : 'myIndex',
+      entityList : Array.from({length : 12}, (v, k) => {
+        return {
+          text : k + 1,
+          index : k + 1
+        }
+      }),
+      eventName : chooseBoardEventName
+    });
+  }
+
   _chooseMyRole () {
-    if (this.state.board == '请选择板子') {
-      Alert.alert("请先选择板子");
+    if (this.state.myIndex == '请选择序号') {
+      Alert.alert("请先选择序号");
       return;
     }
 
@@ -92,6 +110,7 @@ export default class InitGame extends React.Component {
     let config = {
       roles : this.roles,
       myRole : this.myRole,
+      myIndex : this.myIndex,
       hasSheriff : this.state.hasSheriff,
       firstDayBombHasSheriff : this.state.firstDayBombHasSheriff,
     }
@@ -112,6 +131,15 @@ export default class InitGame extends React.Component {
           </TouchableHighlight>
         </View>
 
+        <View style={[styles.modelView]}>
+          <View style={styles.model_Text}>
+            <Text style={styles.model_Text_Word}>{this.state.myIndex}</Text>
+          </View>
+          <TouchableHighlight style={[styles.model_Button]}
+                              onPress={() => this._chooseMyIndex()} underlayColor="#E1F6FF">
+            <Text style={styles.model_Button_Text}>选择序号</Text>
+          </TouchableHighlight>
+        </View>
 
         <View style={[styles.modelView]}>
           <View style={styles.model_Text}>
@@ -202,6 +230,6 @@ const styles = StyleSheet.create({
     borderRadius : 5,
     alignItems : 'center',
     justifyContent : 'center',
-    marginTop : Constants.culHeight(200)
+    marginTop : Constants.culHeight(150)
   },
 });

@@ -171,6 +171,38 @@ const whiteWolfEd = {
   }
 };
 
+const tallTo = {
+  id : 17,
+  name : '轻踩',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家轻踩了" + actionInfo.withMan + "号玩家";
+  }
+};
+
+const tallToEd = {
+  id : 18,
+  name : '被轻踩',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家轻踩了";
+  }
+};
+
+const challengeTo = {
+  id : 19,
+  name : '重踩',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家重踩了" + actionInfo.withMan + "号玩家";
+  }
+};
+
+const challengeToEd = {
+  id : 20,
+  name : '被重踩',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家重踩了";
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -180,4 +212,5 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
+  tallTo, tallToEd, challengeTo, challengeToEd
 }

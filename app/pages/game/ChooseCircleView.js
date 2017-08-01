@@ -215,6 +215,18 @@ export default class ChooseView extends React.Component {
     this._returnMain(data);
   }
 
+  _behaviour (type) {
+    if (Object.keys(this.headerChoice).length == 0) {
+      Alert.alert("请至少选择一个玩家");
+      return;
+    }
+    let data = {
+      item : this._getHeaderChoiceData(),
+      behaviourType : type
+    };
+    this._returnMain(data);
+  }
+
   render () {
     return (
       <View style={[styles.container]}>
@@ -231,7 +243,6 @@ export default class ChooseView extends React.Component {
         </View>
 
         <View style={[styles.footerContainer]}>
-
           {
             this.dataField == 'bomb' ?
               <View style={styles.footerContainer}>
@@ -243,7 +254,7 @@ export default class ChooseView extends React.Component {
                   <Text style={styles.buttonText}>自爆</Text>
                 </TouchableHighlight>
               </View>
-              : <View/>
+              : null
           }
           {
             this.dataField == 'kill' ?
@@ -272,7 +283,7 @@ export default class ChooseView extends React.Component {
                   <Text style={styles.buttonText}>平安夜</Text>
                 </TouchableHighlight>
               </View>
-              : <View/>
+              : null
           }
           {
             this.dataField == 'vote' ?
@@ -293,7 +304,7 @@ export default class ChooseView extends React.Component {
                   <Text style={styles.buttonText}>结束</Text>
                 </TouchableHighlight>
               </View>
-              : <View/>
+              : null
           }
           {
             this.dataField == 'deadWith' ?
@@ -330,7 +341,28 @@ export default class ChooseView extends React.Component {
                   <Text style={styles.buttonText}>白狼杀</Text>
                 </TouchableHighlight>
               </View>
-              : <View/>
+              : null
+          }
+          {
+            this.dataField == 'behaviour' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._behaviour("tallTo")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>轻踩/水包</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._behaviour("challengeTo")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>重踩/怀疑</Text>
+                </TouchableHighlight>
+              </View>
+              : null
           }
         </View>
       </View>
