@@ -167,7 +167,7 @@ export default class Main extends React.Component {
       let aliveGamer = [];
       for (let ga of gameData.gamers) {
         if (ga.isAlive) {//设置平安夜信息
-          withMan = withMan + ga.index + " "
+          withMan = withMan + ga.index + " ";
           aliveGamer.push(ga);
         }
       }
@@ -187,7 +187,7 @@ export default class Main extends React.Component {
     } else if (gamer.length == 2) {//双死
       let withMan = "";
       for (let ga of gamer) {
-        withMan = withMan + ga.index + " "
+        withMan = withMan + ga.index + " ";
       }
       for (let ga of gamer) {
         gamerDead(ga);
@@ -241,7 +241,7 @@ export default class Main extends React.Component {
     let aliveGamer = [];
     for (let ga of gameData.gamers) {
       if (ga.isAlive) {
-        withMan = withMan + ga.index + " "
+        withMan = withMan + ga.index + " ";
         aliveGamer.push(ga);
       }
     }
@@ -328,7 +328,7 @@ export default class Main extends React.Component {
         <Text
           style={styles.body_edge_window_text}>
           {
-            gamer.text + (gamer.sign ? "\r\n(" + gamer.sign + ")" : "") +
+            gamer.text + (gamer.sign ? "(" + gamer.sign + ")" : "") +
             (gamer.isAlive ? "" : "\r\n(死亡)")
           }</Text>
       </TouchableOpacity>
