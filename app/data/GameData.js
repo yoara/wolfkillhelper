@@ -72,7 +72,7 @@ function addGameInfo (text, newline = false) {
   gameData.gameInfoText.push({
     text : "【" + gameData.timeLine.desc + "】" +
     ":\r\n" + text + (newline ? ("\r\n\r\n进入【" + next().desc) +
-      "】........" : "" + "\r\n"),
+      "】........" : "") + "\r\n",
     eventId : gameData.eventId
   });
 }
