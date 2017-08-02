@@ -354,7 +354,7 @@ export default class Main extends React.Component {
         <Text
           style={styles.body_edge_window_text}>
           {
-            gamer.text +
+            gamer.text + (gamer.isSheriff ? "徽" : "") +
             (gamer.sign ? "\r\n标:" + gamer.sign : "") +
             (gamer.declare ? "\r\n认:" + gamer.declare.shortName : "") +
             (gamer.isAlive ? "" : "\r\n(死亡)")
@@ -393,14 +393,14 @@ export default class Main extends React.Component {
     });
   }
 
-  _unDeclare(){
+  _unDeclare () {
     if (!this.state.gamerIndex) {
       this.refs['toast'].show("请先选择玩家");
       return;
     }
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
     let role = gamer.declare;
-    if(!role){
+    if (!role) {
       this.refs['toast'].show("玩家没有认身份");
       return;
     }
@@ -468,6 +468,19 @@ export default class Main extends React.Component {
       action : action,
       withMan : withMan,
     });
+  }
+
+  _office (type) {
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    gamerAction({
+      gamer : gamer,
+      action : type ? Action.office : Action.unOffice,
+    });
+    this._showGamerInfo(gamer);
   }
 
   render () {
@@ -541,7 +554,7 @@ export default class Main extends React.Component {
                 {this.state.gamerInfo}
               </Text>
             </ScrollView>
-            <View style={[styles.headerContainer,{height : Constants.culHeightByPercent(0.15)}]}>
+            <View style={[styles.headerContainer, {height : Constants.culHeightByPercent(0.15)}]}>
               <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
               (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
               <View style={styles.headerContainerView}>
@@ -573,9 +586,30 @@ export default class Main extends React.Component {
                   onPress={() => {
                     this._unDeclare()
                   }}>
-                  <Text style={styles.headerButtonText}>退水</Text>
+                  <Text style={styles.headerButtonText}>脱衣服</Text>
                 </TouchableOpacity>
               </View>
+              {
+                gameData.timeLine.id === 0 ?
+                  (
+                    <View style={styles.headerContainerView}>
+                      <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => {
+                          this._office(true)
+                        }}>
+                        <Text style={styles.headerButtonText}>警上竞选</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.headerButton}
+                        onPress={() => {
+                          this._office(false)
+                        }}>
+                        <Text style={styles.headerButtonText}>警上退水</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : null
+              }
             </View>
           </View>
           <View style={[styles.body_edge, {borderLeftWidth : 1, borderLeftColor : '#e1e1e1'}]}>

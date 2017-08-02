@@ -215,7 +215,23 @@ const unDeclareRole = {
   id : 22,
   name : '退水',
   desc : (actionInfo) => {
-    return actionInfo.gamer.index + "号玩家退水:" + actionInfo.additional.shortName;
+    return actionInfo.gamer.index + "号玩家脱衣服:" + actionInfo.additional.shortName;
+  }
+};
+
+const office = {
+  id : 23,
+  name : '警上竞选',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家参与警上竞选";
+  }
+};
+
+const unOffice = {
+  id : 24,
+  name : '警上退水',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家警上退水";
   }
 };
 
@@ -228,5 +244,6 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
-  tallTo, tallToEd, challengeTo, challengeToEd, declareRole, unDeclareRole
+  tallTo, tallToEd, challengeTo, challengeToEd,
+  declareRole, unDeclareRole, office, unOffice
 }
