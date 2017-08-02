@@ -1,29 +1,42 @@
 /**
  * Created by yoara on 2017/7/24.
  */
-import {init, move, next} from '../model/TimeLine';
+import {init, move, back, next} from '../model/TimeLine';
 let gameData = {
-  gameConfig : null,    //游戏配置
-  gamers : null,        //场上玩家
+  gameConfig : null,      //游戏配置
+  gamers : null,          //场上玩家
   timeLine : null,        //时间轴
-  gameInfoText : "",      //游戏进程信息
+  gameInfoText : [],      //游戏进程信息
   deadOrder : null,       //死亡顺序
   mainConfig : {},        //主界面工具
-  firstDayBomb : false,     //警长竞选自爆
+  firstDayBomb : false,   //警长竞选自爆
+  eventId : 0,            //事件Id
+  timeLineStack : [],     //时间堆栈
 };
+
+function addEventId () {
+  gameData.eventId = gameData.eventId + 1;
+}
+
 function initGameData (config) {
   gameData.gameConfig = config;
   gameData.gamers = [];
-  gameData.gameInfoText = "欢迎进入游戏\r\n\r\n";
+  gameData.gameInfoText = [];
   gameData.timeLine = init();
   gameData.deadOrder = [];
   gameData.firstDayBomb = false;
+  gameData.eventId = 0;
+  gameData.timeLineStack = [{
+    timeLine : gameData.timeLine,
+    eventId : gameData.eventId
+  }];
   gameData.mainConfig = {
     notify_toast : null,      //主界面tip消息框
     notify_confirm : null,    //主界面确认消息框
     mainEventName : null,     //通知事件
     mainView : null,          //主界面对象
   };
+  addGameInfo("欢迎进入游戏\r\n\r\n");
   for (let index = 1; index <= config.roles.length; index++) {
     gameData.gamers.push({
       isAlive : true,
@@ -45,21 +58,39 @@ function initGameData (config) {
 
 function timeLineMove () {
   gameData.timeLine = move();
+  gameData.timeLineStack.push({
+    timeLine : gameData.timeLine,
+    eventId : gameData.eventId
+  });
+}
+
+function timeLineBack () {
+  gameData.timeLine = back();
 }
 
 function addGameInfo (text, newline = false) {
-  gameData.gameInfoText = gameData.gameInfoText + "【" + gameData.timeLine.desc + "】" +
+  gameData.gameInfoText.push({
+    text : "【" + gameData.timeLine.desc + "】" +
     ":\r\n" + text + (newline ? ("\r\n\r\n进入【" + next().desc) +
-      "】........" : "") + "\r\n";
+      "】........" : "" + "\r\n"),
+    eventId : gameData.eventId
+  });
 }
 
 function getGameInfo () {
-  return gameData.gameInfoText;
+  let text = "";
+  for (let textInfo of gameData.gameInfoText) {
+    text = text + textInfo.text;
+  }
+  return text;
 }
 
 function gamerDead (gamer) {
   gamer.isAlive = false;
-  gameData.deadOrder.push(gamer);
+  gameData.deadOrder.push({
+    gamer : gamer,
+    eventId : gameData.eventId
+  });
 }
 
 let actionStack = [];
@@ -109,6 +140,7 @@ function gamerAction (actionParam) {
       additional : actionParam.additional
     };
     ga.action.push({
+      eventId : gameData.eventId,
       timeLine : gameData.timeLine,
       time : actionParam.time,
       action : {
@@ -173,6 +205,58 @@ function gamerAction (actionParam) {
     // }
   }
 }
+
+function gameRedo () {
+  if (gameData.eventId === 0) {
+    return;
+  }
+
+  while (true) {
+    let text = gameData.gameInfoText.pop();
+    if (text.eventId !== gameData.eventId) {
+      gameData.gameInfoText.push(text);
+      break;
+    }
+  }
+
+  for (let gamer of gameData.gamers) {
+    while (true) {
+      let action = gamer.action.pop();
+      if (!action) {
+        break;
+      }
+      if (action.eventId !== gameData.eventId) {
+        gamer.action.push(action);
+        break;
+      }
+    }
+  }
+
+  while (true) {
+    let time = gameData.timeLineStack.pop();
+    if (time.eventId !== gameData.eventId) {
+      gameData.timeLineStack.push(time);
+      break;
+    } else {
+      timeLineBack();
+    }
+  }
+
+  while (true) {
+    let deadGamer = gameData.deadOrder.pop();
+    if (!deadGamer) {
+      break;
+    }
+    if (deadGamer.eventId !== gameData.eventId) {
+      gameData.deadOrder.push(deadGamer);
+      break;
+    } else {
+      deadGamer.gamer.isAlive = true;
+    }
+  }
+
+  gameData.eventId = gameData.eventId - 1;
+}
 /**
  *  gameConfig:
  *    {
@@ -215,7 +299,9 @@ export {
   timeLineMove,
   addGameInfo,
   getGameInfo,
+  addEventId,
   gamerDead,
   gamerAction,
-  resetActionStack
+  resetActionStack,
+  gameRedo
 }

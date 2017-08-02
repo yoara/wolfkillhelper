@@ -3,7 +3,16 @@
  */
 import React from 'react';
 import * as Constants from '../../common/Constants';
-import {gameData, addGameInfo, getGameInfo, gamerDead, gamerAction, resetActionStack} from '../../data/GameData';
+import {
+  gameData,
+  addGameInfo,
+  getGameInfo,
+  gamerDead,
+  gamerAction,
+  resetActionStack,
+  gameRedo,
+  addEventId
+} from '../../data/GameData';
 import * as Action from '../../model/Action';
 import Toast from '../../common/util/Toast';
 import Confirm from "../../common/util/Confirm";
@@ -207,7 +216,7 @@ export default class Main extends React.Component {
   _deadWithAction (data) {
     let gamer = data.item;
     gamerDead(gamer);
-    let whoDo = gameData.deadOrder[gameData.deadOrder.length - 2];
+    let whoDo = gameData.deadOrder[gameData.deadOrder.length - 2].gamer;
     let fromAction = null;
     let toAction = null;
     if ('gun' == data.deadWithType) {
@@ -240,6 +249,7 @@ export default class Main extends React.Component {
       this.refs['toast'].show("夜晚不能投票...");
       return;
     }
+    addEventId();
     let withMan = "";
     let aliveGamer = [];
     for (let ga of gameData.gamers) {
@@ -262,7 +272,7 @@ export default class Main extends React.Component {
       this.refs['toast'].show("夜晚不能投票...");
       return;
     }
-
+    addEventId();
     this.props.navigation.navigate('ChooseCircleView', {
       dataField : 'vote',
       entityList : gameData.gamers,
@@ -278,6 +288,7 @@ export default class Main extends React.Component {
       return;
     }
 
+    addEventId();
     this.props.navigation.navigate('ChooseCircleView', {
       dataField : 'bomb',
       entityList : gameData.gamers,
@@ -291,6 +302,7 @@ export default class Main extends React.Component {
       this.refs['toast'].show("白天不能狼刀...");
       return;
     }
+    addEventId();
     this.props.navigation.navigate('ChooseCircleView', {
       dataField : 'kill',
       entityList : gameData.gamers,
@@ -300,11 +312,18 @@ export default class Main extends React.Component {
   }
 
   _redo () {
-    this.refs['toast'].show("功能尚未完成...");
+    gameRedo();
+    this._info();
+    this.refs['toast'].show("撤销完成...");
   }
 
   _info () {
     this.setState({gamerInfo : getGameInfo(), gamerIndex : null});
+  }
+
+  _gameOver () {
+    this.refs['toast'].show("游戏结束...");
+    this.props.navigation.goBack();
   }
 
   _showGamerInfo (gamer) {
@@ -337,7 +356,7 @@ export default class Main extends React.Component {
           {
             gamer.text +
             (gamer.sign ? "\r\n标:" + gamer.sign : "") +
-            (gamer.declare ? "\r\n认:" + gamer.declare : "") +
+            (gamer.declare ? "\r\n认:" + gamer.declare.shortName : "") +
             (gamer.isAlive ? "" : "\r\n(死亡)")
           }</Text>
       </TouchableOpacity>
@@ -349,7 +368,6 @@ export default class Main extends React.Component {
       this.refs['toast'].show("请先选择玩家");
       return;
     }
-
     this.props.navigation.navigate('ChooseView', {
       dataField : 'sign',
       entityList : roleList,
@@ -368,7 +386,6 @@ export default class Main extends React.Component {
       this.refs['toast'].show("请先选择玩家");
       return;
     }
-
     this.props.navigation.navigate('ChooseView', {
       dataField : 'declare',
       entityList : roleList,
@@ -376,10 +393,30 @@ export default class Main extends React.Component {
     });
   }
 
+  _unDeclare(){
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    let role = gamer.declare;
+    if(!role){
+      this.refs['toast'].show("玩家没有认身份");
+      return;
+    }
+    gamer.declare = null;
+    gamerAction({
+      gamer : gamer,
+      action : Action.unDeclareRole,
+      additional : role
+    });
+    this._showGamerInfo(gamer);
+  }
+
   _declareAction (data) {
     let role = data.item.role;
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
-    gamer.declare = role.shortName;
+    gamer.declare = role;
 
     gamerAction({
       gamer : gamer,
@@ -393,7 +430,7 @@ export default class Main extends React.Component {
       this.refs['toast'].show("请先选择玩家");
       return;
     }
-
+    addEventId();
     this.props.navigation.navigate('ChooseCircleView', {
       dataField : 'behaviour',
       entityList : gameData.gamers,
@@ -482,6 +519,13 @@ export default class Main extends React.Component {
               }}>
               <Text style={styles.headerButtonText}>信息</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._gameOver()
+              }}>
+              <Text style={styles.headerButtonText}>游戏结束</Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -497,7 +541,7 @@ export default class Main extends React.Component {
                 {this.state.gamerInfo}
               </Text>
             </ScrollView>
-            <View style={styles.headerContainer}>
+            <View style={[styles.headerContainer,{height : Constants.culHeightByPercent(0.15)}]}>
               <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
               (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
               <View style={styles.headerContainerView}>
@@ -511,6 +555,15 @@ export default class Main extends React.Component {
                 <TouchableOpacity
                   style={styles.headerButton}
                   onPress={() => {
+                    this._behaviour()
+                  }}>
+                  <Text style={styles.headerButtonText}>行为</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.headerContainerView}>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
                     this._declare()
                   }}>
                   <Text style={styles.headerButtonText}>认身份</Text>
@@ -518,9 +571,9 @@ export default class Main extends React.Component {
                 <TouchableOpacity
                   style={styles.headerButton}
                   onPress={() => {
-                    this._behaviour()
+                    this._unDeclare()
                   }}>
-                  <Text style={styles.headerButtonText}>行为</Text>
+                  <Text style={styles.headerButtonText}>退水</Text>
                 </TouchableOpacity>
               </View>
             </View>

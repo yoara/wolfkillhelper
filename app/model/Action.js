@@ -211,6 +211,14 @@ const declareRole = {
   }
 };
 
+const unDeclareRole = {
+  id : 22,
+  name : '退水',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家退水:" + actionInfo.additional.shortName;
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -220,5 +228,5 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
-  tallTo, tallToEd, challengeTo, challengeToEd, declareRole
+  tallTo, tallToEd, challengeTo, challengeToEd, declareRole, unDeclareRole
 }

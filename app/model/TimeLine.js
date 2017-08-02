@@ -76,6 +76,11 @@ function move () {
   return now();
 }
 
+function back () {
+  timeIndex = timeIndex - 1;
+  return now();
+}
+
 function next () {
   return timeLineList[timeIndex + 1];
 }
@@ -84,5 +89,6 @@ export{
   init,     //初始化时间轴
   now,      //当前时间轴
   move,     //时间轴前推
+  back,     //时间轴倒退
   next,     //下一个时间轴
 }
