@@ -91,6 +91,7 @@ const waiting = [];
  * gamerWith 被动玩家
  * action 具体行为
  * withMan 需记录的关联玩家群
+ * additional 附加信息
  */
 function gamerAction (actionParam) {
   let date = new Date();
@@ -104,7 +105,8 @@ function gamerAction (actionParam) {
     let actionInfo = {
       gamer : ga,
       gamerWith : actionParam.gamerWith,
-      withMan : actionParam.withManWithoutMe
+      withMan : actionParam.withManWithoutMe,
+      additional : actionParam.additional
     };
     ga.action.push({
       timeLine : gameData.timeLine,
@@ -199,6 +201,7 @@ function gamerAction (actionParam) {
  *        },...]
  *      text://显示信息
  *      sign://标记
+ *      declare://认身份
  *        {
  *          角色枚举:true,
  *          ...

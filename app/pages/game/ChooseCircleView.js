@@ -30,8 +30,6 @@ export default class ChooseView extends React.Component {
 
   static navigationOptions = ({navigation}) => ({
     title : navigation.state.params.title || '选择',
-    headerLeft : null,
-    gesturesEnabled : false
   });
 
   _headerChoose (item) {

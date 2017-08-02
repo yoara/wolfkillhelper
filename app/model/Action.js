@@ -19,7 +19,7 @@ const gun = {
   name : '开枪',
   desc : (actionInfo) => {
     let msg = actionInfo.gamer.index + "号玩家开枪带走了：" + actionInfo.gamerWith.index + "号玩家";
-    addGameInfo(msg, false);
+    addGameInfo(msg);
     return msg;
   },
 };
@@ -203,6 +203,14 @@ const challengeToEd = {
   }
 };
 
+const declareRole = {
+  id : 21,
+  name : '认身份',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家认身份:" + actionInfo.additional.shortName;
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -212,5 +220,5 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
-  tallTo, tallToEd, challengeTo, challengeToEd
+  tallTo, tallToEd, challengeTo, challengeToEd, declareRole
 }

@@ -52,6 +52,9 @@ export default class Main extends React.Component {
       } else if ('sign' == field) {
         this._signAction(data);
         showInfoType = 'gamer';
+      } else if ('declare' == field) {
+        this._declareAction(data);
+        showInfoType = 'gamer';
       } else if ('behaviour' == field) {
         this._behaviourAction(data);
         showInfoType = 'gamer';
@@ -296,6 +299,10 @@ export default class Main extends React.Component {
     });
   }
 
+  _redo () {
+    this.refs['toast'].show("功能尚未完成...");
+  }
+
   _info () {
     this.setState({gamerInfo : getGameInfo(), gamerIndex : null});
   }
@@ -328,7 +335,9 @@ export default class Main extends React.Component {
         <Text
           style={styles.body_edge_window_text}>
           {
-            gamer.text + (gamer.sign ? "(" + gamer.sign + ")" : "") +
+            gamer.text +
+            (gamer.sign ? "\r\n标:" + gamer.sign : "") +
+            (gamer.declare ? "\r\n认:" + gamer.declare : "") +
             (gamer.isAlive ? "" : "\r\n(死亡)")
           }</Text>
       </TouchableOpacity>
@@ -352,6 +361,31 @@ export default class Main extends React.Component {
     let role = data.item.role;
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
     gamer.sign = role.shortName;
+  }
+
+  _declare () {
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+
+    this.props.navigation.navigate('ChooseView', {
+      dataField : 'declare',
+      entityList : roleList,
+      eventName : mainEventName
+    });
+  }
+
+  _declareAction (data) {
+    let role = data.item.role;
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    gamer.declare = role.shortName;
+
+    gamerAction({
+      gamer : gamer,
+      action : Action.declareRole,
+      additional : role
+    });
   }
 
   _behaviour () {
@@ -403,41 +437,52 @@ export default class Main extends React.Component {
     return (
       <View style={styles.container}>
         <View style={styles.headerContainer}>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              this._vote()
-            }}>
-            <Text style={styles.headerButtonText}>投票</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              this._voteNoBody()
-            }}>
-            <Text style={styles.headerButtonText}>平安日</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              this._bomb()
-            }}>
-            <Text style={styles.headerButtonText}>自爆</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              this._kill()
-            }}>
-            <Text style={styles.headerButtonText}>狼刀</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.headerButton}
-            onPress={() => {
-              this._info()
-            }}>
-            <Text style={styles.headerButtonText}>信息</Text>
-          </TouchableOpacity>
+          <View style={styles.headerContainerView}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._vote()
+              }}>
+              <Text style={styles.headerButtonText}>投票</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._voteNoBody()
+              }}>
+              <Text style={styles.headerButtonText}>平安日</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._bomb()
+              }}>
+              <Text style={styles.headerButtonText}>自爆</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._kill()
+              }}>
+              <Text style={styles.headerButtonText}>狼刀</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.headerContainerView}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._redo()
+              }}>
+              <Text style={styles.headerButtonText}>撤销操作</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._info()
+              }}>
+              <Text style={styles.headerButtonText}>信息</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.bodyContainer}>
@@ -454,22 +499,30 @@ export default class Main extends React.Component {
             </ScrollView>
             <View style={styles.headerContainer}>
               <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
-              (this.state.gamerIndex?this.state.gamerIndex+"号":"未选择") + "玩家】"}</Text>
-              <TouchableOpacity
-                style={styles.headerButton}
-                onPress={() => {
-                  this._sign()
-                }}>
-                <Text style={styles.headerButtonText}>标记</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.headerButton}
-                onPress={() => {
-                  this._behaviour()
-                }}>
-                <Text style={styles.headerButtonText}>行为</Text>
-              </TouchableOpacity>
+              (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
+              <View style={styles.headerContainerView}>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._sign()
+                  }}>
+                  <Text style={styles.headerButtonText}>标记</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._declare()
+                  }}>
+                  <Text style={styles.headerButtonText}>认身份</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._behaviour()
+                  }}>
+                  <Text style={styles.headerButtonText}>行为</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           <View style={[styles.body_edge, {borderLeftWidth : 1, borderLeftColor : '#e1e1e1'}]}>
@@ -487,7 +540,8 @@ export default class Main extends React.Component {
           btnApproveText='关联'
         />
       </View>
-    );
+    )
+      ;
   }
 }
 
@@ -499,20 +553,20 @@ const styles = StyleSheet.create({
   headerContainer : {
     backgroundColor : '#ffffff',
     height : Constants.culHeightByPercent(0.1),
+    justifyContent : 'space-around',
+  },
+  headerContainerView : {
     flexDirection : 'row',
-    flexWrap : 'wrap',
-    alignItems : 'center'
+    justifyContent : 'space-around',
   },
   headerButton : {
     justifyContent : 'center',
     alignItems : 'center',
-    width : Constants.culWidthByPercent(0.15),
+    width : Constants.culWidthByPercent(0.2),
     height : Constants.culHeightByPercent(0.03),
     backgroundColor : '#f39800',
     borderColor : '#f39800',
     borderWidth : 1,
-    marginLeft : Constants.culWidthByPercent(0.025),
-    marginRight : Constants.culWidthByPercent(0.025),
   },
   headerButtonText : {
     color : '#ffffff',
