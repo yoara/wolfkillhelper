@@ -44,7 +44,7 @@ function initGameData (config) {
       action : [],
       sign : null,
       index : index,
-      text : index + (gameData.gameConfig.myIndex == index ? gameData.gameConfig.myRole.shortName : "")
+      text : index + (gameData.gameConfig.myIndex === index ? gameData.gameConfig.myRole.shortName : "")
     });
   }
   //如果没有警长，则跳过警长竞选阶段
@@ -52,7 +52,7 @@ function initGameData (config) {
     timeLineMove();
     addGameInfo("进入首页");
   } else {
-    addGameInfo("进入警长竞选阶段");
+    addGameInfo("进入【警长竞选阶段】........");
   }
 }
 
@@ -70,8 +70,7 @@ function timeLineBack () {
 
 function addGameInfo (text, newline = false) {
   gameData.gameInfoText.push({
-    text : "【" + gameData.timeLine.desc + "】" +
-    ":\r\n" + text + (newline ? ("\r\n\r\n进入【" + next().desc) +
+    text : text + (newline ? ("\r\n\r\n进入【" + next().desc) +
       "】........" : "") + "\r\n",
     eventId : gameData.eventId
   });
@@ -270,6 +269,7 @@ function gameRedo () {
 /**
  *  gamers:
  *    [{
+ *      office//参加警上竞选
  *      isAlive//是否离场
  *      isSheriff//是否警长
  *      action//行为
@@ -287,7 +287,7 @@ function gameRedo () {
  *      sign://标记
  *      declare://认身份
  *        {
- *          角色枚举:true,
+ *          role
  *          ...
  *        }
  *      index:序号

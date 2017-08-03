@@ -235,6 +235,54 @@ const unOffice = {
   }
 };
 
+const wolfKill = {
+  id : 25,
+  name : '查杀',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家查杀" + actionInfo.gamerWith.index + "号玩家";
+  }
+};
+
+const wolfKillEd = {
+  id : 26,
+  name : '被查杀',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家查杀";
+  }
+};
+
+const goodMan = {
+  id : 27,
+  name : '被查杀',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家查杀";
+  }
+};
+
+const goodManEd = {
+  id : 28,
+  name : '被查杀',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家查杀";
+  }
+};
+
+const standTo = {
+  id : 29,
+  name : '站边',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家站边了" + actionInfo.withMan + "号玩家";
+  }
+};
+
+const standToEd = {
+  id : 30,
+  name : '被站边',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家站边了";
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -244,6 +292,7 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
-  tallTo, tallToEd, challengeTo, challengeToEd,
-  declareRole, unDeclareRole, office, unOffice
+  tallTo, tallToEd, challengeTo, challengeToEd, standTo, standToEd,
+  declareRole, unDeclareRole, office, unOffice,
+  wolfKill, wolfKillEd, goodMan, goodManEd
 }

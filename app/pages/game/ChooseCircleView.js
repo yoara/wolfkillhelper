@@ -110,7 +110,7 @@ export default class ChooseView extends React.Component {
       return;
     }
     let data = {
-      item : this._getHeaderChoiceData()[0]
+      item : this._getHeaderChoiceData()
     };
     this._returnMain(data);
   }
@@ -148,7 +148,11 @@ export default class ChooseView extends React.Component {
   _returnMain (data) {
     data.field = this.dataField;
     DeviceEventEmitter.emit(this.eventName, data);
-    this.props.navigation.goBack();
+    if (this.dataField == 'office') {
+      this.props.navigation.navigate('Main', {officeData:data});
+    } else {
+      this.props.navigation.goBack();
+    }
   }
 
   _vote () {
@@ -200,6 +204,13 @@ export default class ChooseView extends React.Component {
     this._returnMain(data);
   }
 
+  _voteNoBody () {
+    let data = {
+      voteNoBody : true
+    };
+    this._returnMain(data);
+  }
+
   //关联死亡
   _deadWith (message, type) {
     if (Object.keys(this.headerChoice).length != 1) {
@@ -207,7 +218,7 @@ export default class ChooseView extends React.Component {
       return;
     }
     let data = {
-      item : this._getHeaderChoiceData()[0],
+      item : this._getHeaderChoiceData(),
       deadWithType : type,
     };
     this._returnMain(data);
@@ -221,6 +232,25 @@ export default class ChooseView extends React.Component {
     let data = {
       item : this._getHeaderChoiceData(),
       behaviourType : type
+    };
+    this._returnMain(data);
+  }
+
+  _office () {
+    let data = {
+      item : this._getHeaderChoiceData(),
+    };
+    this._returnMain(data);
+  }
+
+  _checkOut (type) {
+    if (Object.keys(this.headerChoice).length != 1) {
+      Alert.alert("验人必须选择一个玩家");
+      return;
+    }
+    let data = {
+      item : this._getHeaderChoiceData(),
+      checkOutType : type ? "wolf" : "man"
     };
     this._returnMain(data);
   }
@@ -301,6 +331,14 @@ export default class ChooseView extends React.Component {
                 >
                   <Text style={styles.buttonText}>结束</Text>
                 </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._voteNoBody()}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>平安日</Text>
+                </TouchableHighlight>
               </View>
               : null
           }
@@ -358,6 +396,47 @@ export default class ChooseView extends React.Component {
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>重踩/怀疑</Text>
+                </TouchableHighlight>
+
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._behaviour("standTo")}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>站边</Text>
+                </TouchableHighlight>
+              </View>
+              : null
+          }
+          {
+            this.dataField == 'office' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._office()}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>警上竞选</Text>
+                </TouchableHighlight>
+              </View>
+              : null
+          }
+          {
+            this.dataField == 'checkOut' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._checkOut(true)}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>查杀</Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._checkOut(false)}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>金水</Text>
                 </TouchableHighlight>
               </View>
               : null

@@ -16,7 +16,7 @@ import {
 import * as Action from '../../model/Action';
 import Toast from '../../common/util/Toast';
 import Confirm from "../../common/util/Confirm";
-import {roleList} from '../../model/Role';
+import {roleList, declareList} from '../../model/Role';
 import {
   View,
   Text,
@@ -25,16 +25,22 @@ import {
   DeviceEventEmitter,
   TouchableOpacity
 } from 'react-native';
-
+export {
+  mainEventName
+}
 const mainEventName = 'mainChoose';
 export default class Main extends React.Component {
   static navigationOptions = ({navigation}) => ({
     title : '游戏界面',
+    header : null
   });
 
   constructor (props) {
     super(props);
-    this.state = {gamerInfo : getGameInfo()};
+    this.state = {
+      gamerInfo : getGameInfo(),
+      officeData : this.props.navigation.state.params.officeData
+    };
   }
 
   componentDidMount () {
@@ -48,24 +54,27 @@ export default class Main extends React.Component {
     this.subscription = DeviceEventEmitter.addListener(mainEventName, (data) => {
       let field = data.field;
       let showInfoType = "main";
-      if ('bomb' == field) {
+      if ('bomb' === field) {
         resetActionStack();
         this._bombAction(data);
-      } else if ('vote' == field) {
+      } else if ('vote' === field) {
         this._voteAction(data);
-      } else if ('kill' == field) {
+      } else if ('kill' === field) {
         resetActionStack();
         this._killAction(data);
-      } else if ('deadWith' == field) {
+      } else if ('deadWith' === field) {
         this._deadWithAction(data);
-      } else if ('sign' == field) {
+      } else if ('sign' === field) {
         this._signAction(data);
         showInfoType = 'gamer';
-      } else if ('declare' == field) {
+      } else if ('declare' === field) {
         this._declareAction(data);
         showInfoType = 'gamer';
-      } else if ('behaviour' == field) {
+      } else if ('behaviour' === field) {
         this._behaviourAction(data);
+        showInfoType = 'gamer';
+      } else if ('checkOut' === field) {
+        this._checkOutAction(data);
         showInfoType = 'gamer';
       }
       if (showInfoType == 'main') {
@@ -74,6 +83,10 @@ export default class Main extends React.Component {
         this._showGamerInfo(gameData.gamers[this.state.gamerIndex - 1]);
       }
     });
+
+    if (this.state.officeData) {
+      this._office(this.state.officeData);
+    }
   }
 
   componentWillUnmount () {
@@ -81,7 +94,7 @@ export default class Main extends React.Component {
   }
 
   _bombAction (data) {
-    let gamer = data.item;
+    let gamer = data.item[0];
     gamerDead(gamer);
     addGameInfo(gamer.index + "号玩家自爆了" +
       (gameData.timeLine.id == 0 && !gameData.gameConfig.firstDayBombHasSheriff ? "，没有警徽" : ""));
@@ -95,6 +108,11 @@ export default class Main extends React.Component {
   }
 
   _voteAction (data) {
+    if (data.voteNoBody) {
+      this._voteNoBody();
+      return;
+    }
+
     //出局Index:投票人Index数组
     let outers = data.item;
     let maxIndex = [];
@@ -116,7 +134,7 @@ export default class Main extends React.Component {
           maxIndex.push(outerIndex);
         }
       }
-      let withMan = outerVoters.join(" ");
+      let withMan = outerVoters.join(" ") + " ";
       let outer = outerIndex != "-1" ? gameData.gamers[parseInt(outerIndex) - 1] : null;
       if (outer != null) {
         gamerAction({
@@ -137,7 +155,7 @@ export default class Main extends React.Component {
     //如果同票人大于1
     if (maxIndex.length > 1) {
       this.refs['toast'].show("平票PK阶段...");
-      addGameInfo(maxIndex.join(" ") + "号玩家平票PK");
+      addGameInfo(maxIndex.join(" ") + " 号玩家平票PK");
     } else if (maxIndex.length == 0) {
       addGameInfo("投票玩家全部弃票");
     } else {
@@ -145,7 +163,7 @@ export default class Main extends React.Component {
       for (let index in outers) {
         for (let outerI in outers[index]) {
           if (outerI == maxIndex[0]) {
-            withMan = outers[index][outerI].join(" ")
+            withMan = outers[index][outerI].join(" ") + " "
           }
         }
       }
@@ -214,7 +232,7 @@ export default class Main extends React.Component {
   }
 
   _deadWithAction (data) {
-    let gamer = data.item;
+    let gamer = data.item[0];
     gamerDead(gamer);
     let whoDo = gameData.deadOrder[gameData.deadOrder.length - 2].gamer;
     let fromAction = null;
@@ -322,8 +340,8 @@ export default class Main extends React.Component {
   }
 
   _gameOver () {
-    this.refs['toast'].show("游戏结束...");
-    this.props.navigation.goBack();
+    //this.refs['toast'].show("游戏结束...");
+    //this.props.navigation.goBack();
   }
 
   _showGamerInfo (gamer) {
@@ -388,7 +406,7 @@ export default class Main extends React.Component {
     }
     this.props.navigation.navigate('ChooseView', {
       dataField : 'declare',
-      entityList : roleList,
+      entityList : declareList,
       eventName : mainEventName
     });
   }
@@ -439,17 +457,62 @@ export default class Main extends React.Component {
     });
   }
 
-  _behaviourAction (data) {
+  _checkOut () {
+    if (!this.state.gamerIndex) {
+      this.refs['toast'].show("请先选择玩家");
+      return;
+    }
+    addEventId();
+    this.props.navigation.navigate('ChooseCircleView', {
+      dataField : 'checkOut',
+      entityList : gameData.gamers,
+      eventName : mainEventName,
+      title : '报验人'
+    });
+  }
+
+  _checkOutAction (data) {
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
-    let to = data.item;
+    let to = data.item[0];
     let action;
     let actionTo;
-    if (data.behaviourType == 'tallTo') {
+    if (data.checkOutType == 'wolf') {
       action = Action.tallTo;
       actionTo = Action.tallToEd;
     } else {
       action = Action.challengeTo;
       actionTo = Action.challengeToEd;
+    }
+    gamerAction({
+      gamer : gamer,
+      action : action,
+      gamerWith : to
+    });
+    gamerAction({
+      gamer : to,
+      action : actionTo,
+      gamerWith : gamer,
+    });
+
+    addGameInfo(action.desc({gamer : gamer,gamerWith : to}))
+  }
+
+  _behaviourAction (data) {
+    let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    let to = data.item;
+    let action;
+    let actionTo;
+    if (data.behaviourType === 'tallTo') {
+      action = Action.tallTo;
+      actionTo = Action.tallToEd;
+    } else if (data.behaviourType === 'challengeTo') {
+      action = Action.challengeTo;
+      actionTo = Action.challengeToEd;
+    } else if (data.behaviourType === 'standTo') {
+      action = Action.standTo;
+      actionTo = Action.standToEd;
+    } else {
+      return;
     }
     let withMan = "";
     for (let ga of to) {
@@ -468,62 +531,96 @@ export default class Main extends React.Component {
       action : action,
       withMan : withMan,
     });
+
+    addGameInfo(action.desc({gamer : gamer,withMan : withMan}))
   }
 
-  _office (type) {
+
+  _office (data) {
+    let gamer = data.item;
+    if (gamer.length === 0) {
+      this.refs['toast'].show("无人竞选警长");
+      this._voteNoBody();
+      return;
+    }
+    let withMan = "";
+    for (let ga of gamer) {
+      withMan = withMan + ga.index + " ";
+    }
+    for (let ga of gamer) {
+      ga.office = true;
+      gamerAction({
+        gamer : ga,
+        action : Action.office,
+        withMan : withMan,
+      });
+    }
+    addGameInfo(withMan + " 参与警长竞选");
+    this.setState({gamerInfo : getGameInfo()});
+  }
+
+  _unOffice () {
     if (!this.state.gamerIndex) {
       this.refs['toast'].show("请先选择玩家");
       return;
     }
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
+    gamer.office = false;
     gamerAction({
       gamer : gamer,
-      action : type ? Action.office : Action.unOffice,
+      action : Action.unOffice,
     });
+    addGameInfo(gamer.index + "号玩家警上退水");
     this._showGamerInfo(gamer);
   }
 
   render () {
     return (
       <View style={styles.container}>
+        <View style={styles.headerTitle}>
+          <Text style={styles.title_Text}>{gameData.timeLine.desc}</Text>
+        </View>
         <View style={styles.headerContainer}>
           <View style={styles.headerContainerView}>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                this._vote()
-              }}>
-              <Text style={styles.headerButtonText}>投票</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                this._voteNoBody()
-              }}>
-              <Text style={styles.headerButtonText}>平安日</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                this._bomb()
-              }}>
-              <Text style={styles.headerButtonText}>自爆</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                this._kill()
-              }}>
-              <Text style={styles.headerButtonText}>狼刀</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.headerContainerView}>
+            {
+              !gameData.timeLine.isNight ?
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._vote()
+                  }}>
+                  <Text style={styles.headerButtonText}>投票</Text>
+                </TouchableOpacity>
+                : null
+            }
+            {
+              !gameData.timeLine.isNight ?
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._bomb()
+                  }}>
+                  <Text style={styles.headerButtonText}>自爆</Text>
+                </TouchableOpacity>
+                : null
+            }
+            {
+              gameData.timeLine.isNight ?
+                <TouchableOpacity
+                  style={styles.headerButton}
+                  onPress={() => {
+                    this._kill()
+                  }}>
+                  <Text style={styles.headerButtonText}>狼刀</Text>
+                </TouchableOpacity>
+                : null
+            }
             <TouchableOpacity
               style={styles.headerButton}
               onPress={() => {
                 this._redo()
               }}>
-              <Text style={styles.headerButtonText}>撤销操作</Text>
+              <Text style={styles.headerButtonText}>撤销</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.headerButton}
@@ -531,13 +628,6 @@ export default class Main extends React.Component {
                 this._info()
               }}>
               <Text style={styles.headerButtonText}>信息</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => {
-                this._gameOver()
-              }}>
-              <Text style={styles.headerButtonText}>游戏结束</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -554,67 +644,81 @@ export default class Main extends React.Component {
                 {this.state.gamerInfo}
               </Text>
             </ScrollView>
-            <View style={[styles.headerContainer, {height : Constants.culHeightByPercent(0.15)}]}>
+            <View style={[styles.footerContainer]}>
               <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
               (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
               <View style={styles.headerContainerView}>
                 <TouchableOpacity
-                  style={styles.headerButton}
+                  style={styles.footerButton}
                   onPress={() => {
                     this._sign()
                   }}>
-                  <Text style={styles.headerButtonText}>标记</Text>
+                  <Text style={styles.footerButtonText}>标记</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.headerButton}
+                  style={styles.footerButton}
                   onPress={() => {
                     this._behaviour()
                   }}>
-                  <Text style={styles.headerButtonText}>行为</Text>
+                  <Text style={styles.footerButtonText}>行为</Text>
                 </TouchableOpacity>
-              </View>
-              <View style={styles.headerContainerView}>
+                {
+                  this.state.gamerIndex &&
+                  (
+                    (gameData.gamers[this.state.gamerIndex - 1].declare &&
+                    gameData.gamers[this.state.gamerIndex - 1].declare.id === 6) ||
+                    (
+                      this.state.gamerIndex === gameData.gameConfig.myIndex &&
+                      gameData.gameConfig.myRole.id === 6
+                    )
+                  ) ?
+                    <TouchableOpacity
+                      style={styles.footerButton}
+                      onPress={() => {
+                        this._checkOut()
+                      }}>
+                      <Text style={styles.footerButtonText}>报验人</Text>
+                    </TouchableOpacity>
+                    : null
+                }
                 <TouchableOpacity
-                  style={styles.headerButton}
+                  style={styles.footerButton}
                   onPress={() => {
                     this._declare()
                   }}>
-                  <Text style={styles.headerButtonText}>认身份</Text>
+                  <Text style={styles.footerButtonText}>认身份</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.headerButton}
-                  onPress={() => {
-                    this._unDeclare()
-                  }}>
-                  <Text style={styles.headerButtonText}>脱衣服</Text>
-                </TouchableOpacity>
+                {
+                  this.state.gamerIndex &&
+                  gameData.gamers[this.state.gamerIndex - 1].declare ?
+                    <TouchableOpacity
+                      style={styles.footerButton}
+                      onPress={() => {
+                        this._unDeclare()
+                      }}>
+                      <Text style={styles.footerButtonText}>脱衣服</Text>
+                    </TouchableOpacity>
+                    : null
+                }
+                {
+                  gameData.timeLine.id === 0 && this.state.gamerIndex &&
+                  gameData.gamers[this.state.gamerIndex - 1].office ?
+                    (
+                      <TouchableOpacity
+                        style={styles.footerButton}
+                        onPress={() => {
+                          this._unOffice()
+                        }}>
+                        <Text style={styles.footerButtonText}>退水</Text>
+                      </TouchableOpacity>
+                    ) : null
+                }
               </View>
-              {
-                gameData.timeLine.id === 0 ?
-                  (
-                    <View style={styles.headerContainerView}>
-                      <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => {
-                          this._office(true)
-                        }}>
-                        <Text style={styles.headerButtonText}>警上竞选</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.headerButton}
-                        onPress={() => {
-                          this._office(false)
-                        }}>
-                        <Text style={styles.headerButtonText}>警上退水</Text>
-                      </TouchableOpacity>
-                    </View>
-                  ) : null
-              }
             </View>
           </View>
           <View style={[styles.body_edge, {borderLeftWidth : 1, borderLeftColor : '#e1e1e1'}]}>
             {
-              gameData.gamers.map((gamer, i) => this._edgeWindow(gamer, i, 6, 11))
+              gameData.gamers.map((gamer, i) => this._edgeWindow(gamer, i, 6, gameData.gameConfig.gamerCount - 1))
             }
           </View>
         </View>
@@ -633,9 +737,21 @@ export default class Main extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  headerTitle : {
+    marginTop : Constants.culHeightByPercent(0.02),
+    backgroundColor : '#ffffff',
+    height : Constants.culHeightByPercent(0.05),
+    justifyContent : 'center',
+    alignItems : 'center',
+  },
+  title_Text : {
+    textAlign : 'center',
+    color : '#5c5c5c',
+    fontSize : 16
+  },
   container : {   //容器局样式
     backgroundColor : '#ffffff',
-    height : Constants.STANDARD_HEIGHT
+    height : Constants.culHeightByPercent(0.93)
   },
   headerContainer : {
     backgroundColor : '#ffffff',
@@ -649,10 +765,11 @@ const styles = StyleSheet.create({
   headerButton : {
     justifyContent : 'center',
     alignItems : 'center',
-    width : Constants.culWidthByPercent(0.2),
-    height : Constants.culHeightByPercent(0.03),
+    width : Constants.culHeightByPercent(0.08),
+    height : Constants.culHeightByPercent(0.08),
     backgroundColor : '#f39800',
     borderColor : '#f39800',
+    borderRadius : 28,
     borderWidth : 1,
   },
   headerButtonText : {
@@ -662,15 +779,16 @@ const styles = StyleSheet.create({
   bodyContainer : {
     borderTopWidth : Constants.culHeight(1),
     borderColor : '#e1e1e1',
-    height : Constants.culHeightByPercent(0.9),
+    height : Constants.culHeightByPercent(0.83),
     flexDirection : 'row',
     justifyContent : 'space-between',
   },
   body_edge : {
-    width : Constants.culWidthByPercent(0.15)
+    width : Constants.culWidthByPercent(0.15),
+    backgroundColor : '#ffffff',
   },
   body_edge_window : {
-    height : Constants.culHeightByPercent(0.13),
+    height : Constants.culHeightByPercent(0.14),
     borderBottomWidth : Constants.culHeight(1),
     borderColor : '#e1e1e1',
     alignItems : 'center',
@@ -684,15 +802,34 @@ const styles = StyleSheet.create({
   },
   body_center : {
     width : Constants.culWidthByPercent(0.7),
-    height : Constants.culHeightByPercent(0.7)
+    height : Constants.culHeightByPercent(0.83)
   },
   body_scroll : {
-    height : Constants.culHeightByPercent(0.6),
+    height : Constants.culHeightByPercent(0.7),
     borderBottomWidth : 1,
-    borderBottomColor : '#c9c9c9'
+    borderBottomColor : '#8e8e8e'
   },
   body_center_text : {
     marginTop : 3,
     marginLeft : 3
-  }
+  },
+  footerContainer : {
+    backgroundColor : '#ffffff',
+    height : Constants.culHeightByPercent(0.13),
+    justifyContent : 'space-around',
+  },
+  footerButton : {
+    justifyContent : 'center',
+    alignItems : 'center',
+    width : Constants.culHeightByPercent(0.06),
+    height : Constants.culHeightByPercent(0.06),
+    backgroundColor : '#f39800',
+    borderColor : '#f39800',
+    borderRadius : 22,
+    borderWidth : 1,
+  },
+  footerButtonText : {
+    color : '#ffffff',
+    fontSize : 12
+  },
 });
