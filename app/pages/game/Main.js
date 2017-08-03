@@ -639,11 +639,13 @@ export default class Main extends React.Component {
             }
           </View>
           <View style={styles.body_center}>
-            <ScrollView style={styles.body_scroll}>
-              <Text style={styles.body_center_text}>
-                {this.state.gamerInfo}
-              </Text>
-            </ScrollView>
+            <View style={styles.body_scroll}>
+              <ScrollView >
+                <Text style={styles.body_center_text}>
+                  {this.state.gamerInfo}
+                </Text>
+              </ScrollView>
+            </View>
             <View style={[styles.footerContainer]}>
               <Text style={{width : Constants.culWidthByPercent(0.7)}}>{"【" +
               (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
@@ -751,7 +753,7 @@ const styles = StyleSheet.create({
   },
   container : {   //容器局样式
     backgroundColor : '#ffffff',
-    height : Constants.culHeightByPercent(0.93)
+    height : Constants.culHeightByPercent(Constants.OS==='ios'?0.93:1)
   },
   headerContainer : {
     backgroundColor : '#ffffff',
@@ -779,7 +781,7 @@ const styles = StyleSheet.create({
   bodyContainer : {
     borderTopWidth : Constants.culHeight(1),
     borderColor : '#e1e1e1',
-    height : Constants.culHeightByPercent(0.83),
+    height : Constants.culHeightByPercent(Constants.OS==='ios'?0.83:0.9),
     flexDirection : 'row',
     justifyContent : 'space-between',
   },
@@ -788,7 +790,7 @@ const styles = StyleSheet.create({
     backgroundColor : '#ffffff',
   },
   body_edge_window : {
-    height : Constants.culHeightByPercent(0.14),
+    height : Constants.culHeightByPercent(Constants.OS==='ios'?0.14:0.134),
     borderBottomWidth : Constants.culHeight(1),
     borderColor : '#e1e1e1',
     alignItems : 'center',
@@ -802,10 +804,9 @@ const styles = StyleSheet.create({
   },
   body_center : {
     width : Constants.culWidthByPercent(0.7),
-    height : Constants.culHeightByPercent(0.83)
   },
   body_scroll : {
-    height : Constants.culHeightByPercent(0.7),
+    height : Constants.culHeightByPercent(Constants.OS==='ios'?0.7:0.62),
     borderBottomWidth : 1,
     borderBottomColor : '#8e8e8e'
   },
@@ -815,7 +816,7 @@ const styles = StyleSheet.create({
   },
   footerContainer : {
     backgroundColor : '#ffffff',
-    height : Constants.culHeightByPercent(0.13),
+    height : Constants.culHeightByPercent(Constants.OS==='ios'?0.13:0.18),
     justifyContent : 'space-around',
   },
   footerButton : {
