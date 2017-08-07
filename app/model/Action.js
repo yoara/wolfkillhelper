@@ -253,17 +253,17 @@ const wolfKillEd = {
 
 const goodMan = {
   id : 27,
-  name : '被查杀',
+  name : '金水',
   desc : (actionInfo) => {
-    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家查杀";
+    return actionInfo.gamer.index + "号玩家发金水给" + actionInfo.gamerWith.index + "号玩家";
   }
 };
 
 const goodManEd = {
   id : 28,
-  name : '被查杀',
+  name : '被金水',
   desc : (actionInfo) => {
-    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家查杀";
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家发了金水";
   }
 };
 
@@ -283,6 +283,46 @@ const standToEd = {
   }
 };
 
+const saveTo = {
+  id : 31,
+  name : '银水',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家发银水给" + actionInfo.gamerWith.index + "号玩家";
+  }
+};
+
+const saveToEd = {
+  id : 32,
+  name : '被银水',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家发银水了";
+  }
+};
+
+const giveSheriff = {
+  id : 33,
+  name : '飞警徽',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家把警徽飞给了" + actionInfo.gamerWith.index + "号玩家";
+  }
+};
+
+const giveSheriffEd = {
+  id : 34,
+  name : '被飞警徽',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家被" + actionInfo.gamerWith.index + "号玩家飞了警徽";
+  }
+};
+
+const destroySheriff = {
+  id : 35,
+  name : '撕警徽',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家撕掉了警徽";
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -292,7 +332,7 @@ export{
   love, loveEd,
   bitch, bitchEd,
   whiteWolf, whiteWolfEd,
-  tallTo, tallToEd, challengeTo, challengeToEd, standTo, standToEd,
-  declareRole, unDeclareRole, office, unOffice,
-  wolfKill, wolfKillEd, goodMan, goodManEd
+  tallTo, tallToEd, challengeTo, challengeToEd, standTo, standToEd, saveTo, saveToEd,
+  declareRole, unDeclareRole, office, unOffice, giveSheriff, giveSheriffEd, destroySheriff,
+  wolfKill, wolfKillEd, goodMan, goodManEd,
 }

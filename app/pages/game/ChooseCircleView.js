@@ -255,6 +255,28 @@ export default class ChooseView extends React.Component {
     this._returnMain(data);
   }
 
+  _witchOut () {
+    if (Object.keys(this.headerChoice).length != 1) {
+      Alert.alert("银水必须选择一个玩家");
+      return;
+    }
+    let data = {
+      item : this._getHeaderChoiceData(),
+    };
+    this._returnMain(data);
+  }
+
+  _giveSheriff () {
+    if (Object.keys(this.headerChoice).length != 1) {
+      Alert.alert("飞警徽必须选择一个玩家");
+      return;
+    }
+    let data = {
+      item : this._getHeaderChoiceData(),
+    };
+    this._returnMain(data);
+  }
+
   render () {
     return (
       <View style={[styles.container]}>
@@ -437,6 +459,32 @@ export default class ChooseView extends React.Component {
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>金水</Text>
+                </TouchableHighlight>
+              </View>
+              : null
+          }
+          {
+            this.dataField == 'witchOut' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._witchOut()}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>银水</Text>
+                </TouchableHighlight>
+              </View>
+              : null
+          }
+          {
+            this.dataField == 'giveSheriff' ?
+              <View style={styles.footerContainer}>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._giveSheriff()}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>飞警徽</Text>
                 </TouchableHighlight>
               </View>
               : null
