@@ -149,7 +149,7 @@ export default class ChooseView extends React.Component {
     data.field = this.dataField;
     DeviceEventEmitter.emit(this.eventName, data);
     if (this.dataField == 'office') {
-      this.props.navigation.navigate('Main', {officeData:data});
+      this.props.navigation.navigate('Main', {officeData : data});
     } else {
       this.props.navigation.goBack();
     }
@@ -280,12 +280,21 @@ export default class ChooseView extends React.Component {
   render () {
     return (
       <View style={[styles.container]}>
+        {
+          this.bodyEntityList.length > 0 ?
+            <View><Text style={styles.tipText}>被投票区</Text></View>
+            : null
+        }
         <View style={[styles.headerContainer]}>
           {
             this.entityList.map((item, i) => this._renderHeaderItem(item, i))
           }
         </View>
-
+        {
+          this.bodyEntityList.length > 0 ?
+            <View><Text style={styles.tipText}>投票区</Text></View>
+            : null
+        }
         <View style={[styles.bodyContainer]}>
           {
             this.bodyEntityList.map((item, i) => this._renderBodyItem(item, i))
@@ -353,14 +362,17 @@ export default class ChooseView extends React.Component {
                 >
                   <Text style={styles.buttonText}>结束</Text>
                 </TouchableHighlight>
-
-                <TouchableHighlight
-                  underlayColor="#E1F6FF"
-                  onPress={() => this._voteNoBody()}
-                  style={styles.button}
-                >
-                  <Text style={styles.buttonText}>平安日</Text>
-                </TouchableHighlight>
+                {
+                  this.voteInfo.length == 0 ?
+                    <TouchableHighlight
+                      underlayColor="#E1F6FF"
+                      onPress={() => this._voteNoBody()}
+                      style={styles.button}
+                    >
+                      <Text style={styles.buttonText}>平安日</Text>
+                    </TouchableHighlight>
+                    : null
+                }
               </View>
               : null
           }

@@ -298,7 +298,8 @@ export default class Main extends React.Component {
       view : 'ChooseCircleView',
       dataField : 'vote',
       viewTitle : '投票',
-      needAddEvent : true
+      needAddEvent : true,
+      bodyEntityList : gameData.gamers,
     });
   }
 
@@ -328,7 +329,8 @@ export default class Main extends React.Component {
       dataField : param.dataField,
       entityList : param.gamers || gameData.gamers,
       eventName : mainEventName,
-      title : param.viewTitle
+      title : param.viewTitle,
+      bodyEntityList : param.bodyEntityList,
     });
   }
 
@@ -557,6 +559,7 @@ export default class Main extends React.Component {
     } else {
       let gamer = gameData.gamers[this.state.gamerIndex - 1];
       addEventId();
+      gamer.isSheriff = false;
       gamerAction({
         gamer : gamer,
         action : Action.destroySheriff,
@@ -580,6 +583,8 @@ export default class Main extends React.Component {
       action : actionTo,
       gamerWith : gamer,
     });
+    gamer.isSheriff = false;
+    to.isSheriff = true;
     addGameInfo(action.desc({gamer : gamer, gamerWith : to}))
   }
 
