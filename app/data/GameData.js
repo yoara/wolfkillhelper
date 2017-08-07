@@ -159,7 +159,7 @@ function getLoginInfo () {
         }
       }
       text += "【查杀】" + wolfKill + "\r\n";
-      text += "【被投票】\r\n" + voteEd + "\r\n";
+      text += "【被投票】\r\n" + voteEd;
       text += "【金水】" + goodMan + "\r\n";
       text += "【被站边】" + standToEd + "\r\n";
       text += "【被轻踩】" + tallToEd + "\r\n";

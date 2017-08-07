@@ -730,7 +730,7 @@ export default class Main extends React.Component {
                     : null
                 }
                 {
-                  this.state.gamerIndex ?
+                  this.state.gamerIndex && gameData.gamers[this.state.gamerIndex - 1].isAlive ?
                     <TouchableOpacity
                       style={styles.footerButton}
                       onPress={() => {
@@ -742,6 +742,7 @@ export default class Main extends React.Component {
                 }
                 {
                   this.state.gamerIndex &&
+                  gameData.gamers[this.state.gamerIndex - 1].isAlive &&
                   (
                     (gameData.gamers[this.state.gamerIndex - 1].declare &&
                     gameData.gamers[this.state.gamerIndex - 1].declare.id === 6) ||
@@ -761,6 +762,7 @@ export default class Main extends React.Component {
                 }
                 {
                   this.state.gamerIndex &&
+                  gameData.gamers[this.state.gamerIndex - 1].isAlive &&
                   (
                     (gameData.gamers[this.state.gamerIndex - 1].declare &&
                     gameData.gamers[this.state.gamerIndex - 1].declare.id === 3) ||
@@ -803,6 +805,7 @@ export default class Main extends React.Component {
                 }
                 {
                   gameData.timeLine.id === 0 && this.state.gamerIndex &&
+                  gameData.gamers[this.state.gamerIndex - 1].isAlive &&
                   gameData.gamers[this.state.gamerIndex - 1].office ?
                     (
                       <TouchableOpacity
