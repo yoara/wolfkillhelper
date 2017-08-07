@@ -11,7 +11,8 @@ import {
   gamerAction,
   resetActionStack,
   gameRedo,
-  addEventId
+  addEventId,
+  getLoginInfo
 } from '../../data/GameData';
 import * as Action from '../../model/Action';
 import Toast from '../../common/util/Toast';
@@ -184,7 +185,7 @@ export default class Main extends React.Component {
       let ga = gameData.gamers[parseInt(maxIndex[0]) - 1];
       if (gameData.timeLine.id > 1) {
         gamerDead(ga);
-        addGameInfo(ga.index + "号玩家被投票出局");
+        addGameInfo(Action.voteEdDead.desc({gamer : ga, withMan : withMan}));
         gamerAction({
           gamer : ga,
           action : Action.voteEdDead,
@@ -192,7 +193,7 @@ export default class Main extends React.Component {
         });
       } else {  //警长竞选阶段，该玩家上警
         ga.isSheriff = true;
-        addGameInfo(ga.index + "号玩家被选为警长");
+        addGameInfo(Action.voteEdSheriff.desc({gamer : ga, withMan : withMan}));
         gamerAction({
           gamer : ga,
           action : Action.voteEdSheriff,
@@ -221,7 +222,7 @@ export default class Main extends React.Component {
     } else if (gamer.length == 1) {//单死
       let oneGamer = gamer[0];
       gamerDead(oneGamer);
-      addGameInfo(oneGamer.index + "号玩家夜晚单死");
+      addGameInfo(Action.oneDeadNight.desc({gamer : oneGamer}));
       gamerAction({
         gamer : oneGamer,
         action : Action.oneDeadNight,
@@ -593,6 +594,10 @@ export default class Main extends React.Component {
     //this.props.navigation.goBack();
   }
 
+  _logic () {
+    this.setState({gamerInfo : getLoginInfo()});
+  }
+
   _showGamerInfo (gamer) {
     let gamerInfo = "【" + gamer.index + "号玩家信息】\r\n";
     let action = gamer.action;
@@ -684,6 +689,13 @@ export default class Main extends React.Component {
                 this._info()
               }}>
               <Text style={styles.headerButtonText}>信息</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => {
+                this._logic()
+              }}>
+              <Text style={styles.headerButtonText}>盘逻辑</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -922,7 +934,7 @@ const styles = StyleSheet.create({
   },
   body_scroll : {
     height : Constants.culHeightByPercent(Constants.OS === 'ios' ? 0.7 : 0.62),
-    borderBottomWidth : 1,
+    borderBottomWidth : 0.3,
     borderBottomColor : '#8e8e8e'
   },
   body_center_text : {

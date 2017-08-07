@@ -1,7 +1,9 @@
 /**
  * Created by yoara on 2017/7/24.
  */
-import {init, move, back, next} from '../model/TimeLine';
+import {init, move, back, next, JZJX} from '../model/TimeLine';
+import {prophet} from '../model/Role';
+import * as Action from '../model/Action';
 let gameData = {
   gameConfig : null,      //游戏配置
   gamers : null,          //场上玩家
@@ -84,6 +86,91 @@ function getGameInfo () {
   return text;
 }
 
+function getLoginInfo () {
+  let text = "";
+  for (let v1 of gameData.gamers) {
+    //认预言家或标记为预言家
+    if ((v1.sign && v1.sign.id === prophet.id) || (v1.declare && v1.declare.id === prophet.id)) {
+      text += "【" + v1.index + "号玩家】预言家逻辑\r\n";
+      //查杀
+      let wolfKill = "";
+      //被投票
+      let voteEd = "";
+      //金水
+      let goodMan = "";
+      //被站边
+      let standToEd = "";
+      //被轻踩
+      let tallToEd = "";
+      //被重踩
+      let challengeToEd = "";
+      //摇摆人
+      let changeMan = "";
+      for (let ac of v1.action) {
+        if(ac.action.id === Action.voteEd.id){
+          if (ac.timeLine.id > 1) {
+            voteEd += "--【" + ac.timeLine.desc + "】" + ac.action.withMan + "\r\n";
+          }else if(ac.timeLine === JZJX){
+            standToEd += ac.action.withMan;
+          }
+        }
+        if (ac.action.gamerWith) {
+          let gamerIndex = ac.action.gamerWith.index + " ";
+          if (ac.action.id === Action.wolfKill.id) {
+            wolfKill += gamerIndex;
+          }
+          if (ac.action.id === Action.goodMan.id) {
+            goodMan += gamerIndex;
+          }
+          if (ac.action.id === Action.standToEd.id) {
+            if (standToEd.indexOf(gamerIndex) !== -1) {
+              standToEd = standToEd.replace(gamerIndex, "");
+            }
+            standToEd += gamerIndex;
+            if (tallToEd.indexOf(gamerIndex) !== -1) {
+              tallToEd = tallToEd.replace(gamerIndex, "");
+              changeMan += gamerIndex;
+            }
+            if (challengeToEd.indexOf(gamerIndex) !== -1) {
+              challengeToEd = challengeToEd.replace(gamerIndex, "");
+              changeMan += gamerIndex;
+            }
+          }
+          if (ac.action.id === Action.tallToEd.id) {
+            if (tallToEd.indexOf(gamerIndex) !== -1) {
+              tallToEd = tallToEd.replace(gamerIndex, "");
+            }
+            tallToEd += gamerIndex;
+            if (standToEd.indexOf(gamerIndex) !== -1) {
+              standToEd = standToEd.replace(gamerIndex, "");
+              changeMan += gamerIndex;
+            }
+          }
+          if (ac.action.id === Action.challengeToEd.id) {
+            if (challengeToEd.indexOf(gamerIndex) !== -1) {
+              challengeToEd = challengeToEd.replace(gamerIndex, "");
+            }
+            challengeToEd += gamerIndex;
+            if (standToEd.indexOf(gamerIndex) !== -1) {
+              standToEd = standToEd.replace(gamerIndex, "");
+              changeMan += gamerIndex;
+            }
+          }
+        }
+      }
+      text += "【查杀】" + wolfKill + "\r\n";
+      text += "【被投票】\r\n" + voteEd + "\r\n";
+      text += "【金水】" + goodMan + "\r\n";
+      text += "【被站边】" + standToEd + "\r\n";
+      text += "【被轻踩】" + tallToEd + "\r\n";
+      text += "【被重踩】" + challengeToEd + "\r\n";
+      text += "【摇摆人】" + changeMan + "\r\n";
+      text += "\r\n-----------\r\n\r\n";
+    }
+  }
+  return text === "" ? "暂无" : text;
+}
+
 function gamerDead (gamer) {
   gamer.isAlive = false;
   gameData.deadOrder.push({
@@ -105,7 +192,7 @@ function popActionStack () {
     addGameInfo("游戏进入下一阶段", true);
     timeLineMove();
     //如果狼人自爆且前个阶段是竞选警长阶段，则警徽丢失
-    if (gameData.timeLine.id == 2 && gameData.firstDayBomb) {
+    if (gameData.timeLine.id === 2 && gameData.firstDayBomb) {
       addGameInfo("自爆不能发言", true);
       timeLineMove();
     }
@@ -145,7 +232,9 @@ function gamerAction (actionParam) {
       action : {
         id : actionParam.action.id,
         desc : actionParam.action.desc(actionInfo),
-        withMan : actionParam.withManWithoutMe
+        withMan : actionParam.withManWithoutMe,
+        gamerWith : actionInfo.gamerWith,
+        additional : actionInfo.additional,
       }
     });
   }
@@ -303,5 +392,6 @@ export {
   gamerDead,
   gamerAction,
   resetActionStack,
-  gameRedo
+  gameRedo,
+  getLoginInfo,
 }

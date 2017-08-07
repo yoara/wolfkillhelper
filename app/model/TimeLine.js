@@ -91,4 +91,5 @@ export{
   move,     //时间轴前推
   back,     //时间轴倒退
   next,     //下一个时间轴
+  JZJX
 }
