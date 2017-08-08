@@ -43,8 +43,8 @@ export default class ChooseView extends React.Component {
       delete this.headerChoice[item.index];
     } else {
       //自爆或者投票只能选择一个
-      if ('bomb' == this.dataField || 'vote' == this.dataField) {
-        if (Object.keys(this.headerChoice).length == 1) {
+      if ('bomb' === this.dataField || 'vote' === this.dataField) {
+        if (Object.keys(this.headerChoice).length === 1) {
           Alert.alert("只能选择一个玩家");
           return;
         }
@@ -71,7 +71,7 @@ export default class ChooseView extends React.Component {
   }
 
   _renderHeaderItem (item, i) {
-    let active = this.state[item.index + "headerActive"] ? true : false;
+    let active = !!this.state[item.index + "headerActive"];
     return (
       <TouchableHighlight
         key={i}
@@ -84,7 +84,7 @@ export default class ChooseView extends React.Component {
   }
 
   _renderBodyItem (item, i) {
-    let active = this.state[item.index + "bodyActive"] ? true : false;
+    let active = !!this.state[item.index + "bodyActive"];
     return (
       <TouchableHighlight
         key={i}
@@ -105,7 +105,7 @@ export default class ChooseView extends React.Component {
   }
 
   _bomb () {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if (Object.keys(this.headerChoice).length !== 1) {
       Alert.alert("请选择一个玩家自爆");
       return;
     }
@@ -116,7 +116,7 @@ export default class ChooseView extends React.Component {
   }
 
   _oneKill () {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if (Object.keys(this.headerChoice).length !== 1) {
       Alert.alert("单死必须选择一个玩家");
       return;
     }
@@ -127,7 +127,7 @@ export default class ChooseView extends React.Component {
   }
 
   _twoKill () {
-    if (Object.keys(this.headerChoice).length != 2) {
+    if (Object.keys(this.headerChoice).length !== 2) {
       Alert.alert("双死必须选择两个玩家");
       return;
     }
@@ -138,7 +138,7 @@ export default class ChooseView extends React.Component {
   }
 
   _noKill () {
-    if (Object.keys(this.headerChoice).length != 0) {
+    if (Object.keys(this.headerChoice).length !== 0) {
       Alert.alert("平安夜不用选择玩家");
       return;
     }
@@ -148,7 +148,7 @@ export default class ChooseView extends React.Component {
   _returnMain (data) {
     data.field = this.dataField;
     DeviceEventEmitter.emit(this.eventName, data);
-    if (this.dataField == 'office') {
+    if (this.dataField === 'office') {
       this.props.navigation.navigate('Main', {officeData : data});
     } else {
       this.props.navigation.goBack();
@@ -156,14 +156,14 @@ export default class ChooseView extends React.Component {
   }
 
   _vote () {
-    if (Object.keys(this.headerChoice).length == 0
-      && Object.keys(this.bodyChoice).length == 0) {
+    if (Object.keys(this.headerChoice).length === 0
+      && Object.keys(this.bodyChoice).length === 0) {
       Alert.alert("请选择投票结果");
       return;
     }
 
     if (Object.keys(this.headerChoice).length > 0
-      && Object.keys(this.bodyChoice).length == 0) {
+      && Object.keys(this.bodyChoice).length === 0) {
       Alert.alert("请选择投票玩家");
       return;
     }
@@ -194,13 +194,13 @@ export default class ChooseView extends React.Component {
   }
 
   _voteFinish () {
-    if (this.voteInfo.length == 0) {
+    if (this.voteInfo.length === 0) {
       Alert.alert("请录入投票结果");
       return;
     }
     let data = {
       item : this.voteInfo
-    }
+    };
     this._returnMain(data);
   }
 
@@ -213,7 +213,7 @@ export default class ChooseView extends React.Component {
 
   //关联死亡
   _deadWith (message, type) {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if (Object.keys(this.headerChoice).length !== 1) {
       Alert.alert(message);
       return;
     }
@@ -225,7 +225,7 @@ export default class ChooseView extends React.Component {
   }
 
   _behaviour (type) {
-    if (Object.keys(this.headerChoice).length == 0) {
+    if (Object.keys(this.headerChoice).length === 0) {
       Alert.alert("请至少选择一个玩家");
       return;
     }
@@ -244,19 +244,23 @@ export default class ChooseView extends React.Component {
   }
 
   _checkOut (type) {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if ((type === 'wolf' || type === 'man') && Object.keys(this.headerChoice).length !== 1) {
       Alert.alert("验人必须选择一个玩家");
+      return;
+    }
+    if ((type === 'check') && Object.keys(this.headerChoice).length === 0) {
+      Alert.alert("警徽流必须选择一个以上玩家");
       return;
     }
     let data = {
       item : this._getHeaderChoiceData(),
-      checkOutType : type ? "wolf" : "man"
+      checkOutType : type
     };
     this._returnMain(data);
   }
 
   _witchOut () {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if (Object.keys(this.headerChoice).length !== 1) {
       Alert.alert("银水必须选择一个玩家");
       return;
     }
@@ -267,7 +271,7 @@ export default class ChooseView extends React.Component {
   }
 
   _giveSheriff () {
-    if (Object.keys(this.headerChoice).length != 1) {
+    if (Object.keys(this.headerChoice).length !== 1) {
       Alert.alert("飞警徽必须选择一个玩家");
       return;
     }
@@ -303,7 +307,7 @@ export default class ChooseView extends React.Component {
 
         <View style={[styles.footerContainer]}>
           {
-            this.dataField == 'bomb' ?
+            this.dataField === 'bomb' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -316,7 +320,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'kill' ?
+            this.dataField === 'kill' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -345,7 +349,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'vote' ?
+            this.dataField === 'vote' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -363,7 +367,7 @@ export default class ChooseView extends React.Component {
                   <Text style={styles.buttonText}>结束</Text>
                 </TouchableHighlight>
                 {
-                  this.voteInfo.length == 0 ?
+                  this.voteInfo.length === 0 ?
                     <TouchableHighlight
                       underlayColor="#E1F6FF"
                       onPress={() => this._voteNoBody()}
@@ -377,7 +381,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'deadWith' ?
+            this.dataField === 'deadWith' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -414,7 +418,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'behaviour' ?
+            this.dataField === 'behaviour' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -443,7 +447,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'office' ?
+            this.dataField === 'office' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -456,27 +460,34 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'checkOut' ?
+            this.dataField === 'checkOut' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._checkOut(true)}
+                  onPress={() => this._checkOut('wolf')}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>查杀</Text>
                 </TouchableHighlight>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
-                  onPress={() => this._checkOut(false)}
+                  onPress={() => this._checkOut('man')}
                   style={styles.button}
                 >
                   <Text style={styles.buttonText}>金水</Text>
+                </TouchableHighlight>
+                <TouchableHighlight
+                  underlayColor="#E1F6FF"
+                  onPress={() => this._checkOut('check')}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>警徽(验人)流</Text>
                 </TouchableHighlight>
               </View>
               : null
           }
           {
-            this.dataField == 'witchOut' ?
+            this.dataField === 'witchOut' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -489,7 +500,7 @@ export default class ChooseView extends React.Component {
               : null
           }
           {
-            this.dataField == 'giveSheriff' ?
+            this.dataField === 'giveSheriff' ?
               <View style={styles.footerContainer}>
                 <TouchableHighlight
                   underlayColor="#E1F6FF"
@@ -532,7 +543,6 @@ const styles = StyleSheet.create({
     flexDirection : 'row'
   },
   tipContentView : {
-    justifyContent : 'center',
     alignItems : 'center',
     width : Constants.culWidthByPercent(0.12),
     height : Constants.culWidthByPercent(0.12),

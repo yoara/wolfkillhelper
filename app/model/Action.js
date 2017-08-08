@@ -323,6 +323,14 @@ const destroySheriff = {
   }
 };
 
+const checkOrder = {
+  id : 36,
+  name : '警徽流',
+  desc : (actionInfo) => {
+    return actionInfo.gamer.index + "号玩家警徽流：" + actionInfo.withMan;
+  }
+};
+
 export{
   bomb,
   gun, gunEd,
@@ -334,5 +342,5 @@ export{
   whiteWolf, whiteWolfEd,
   tallTo, tallToEd, challengeTo, challengeToEd, standTo, standToEd, saveTo, saveToEd,
   declareRole, unDeclareRole, office, unOffice, giveSheriff, giveSheriffEd, destroySheriff,
-  wolfKill, wolfKillEd, goodMan, goodManEd,
+  wolfKill, wolfKillEd, goodMan, goodManEd, checkOrder
 }

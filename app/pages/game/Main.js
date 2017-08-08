@@ -451,25 +451,34 @@ export default class Main extends React.Component {
     let to = data.item[0];
     let action;
     let actionTo;
-    if (data.checkOutType == 'wolf') {
+    let withMan = "";
+    for (let ga of data.item) {
+      withMan = withMan + ga.index + " ";
+    }
+    if (data.checkOutType === 'wolf') {
       action = Action.wolfKill;
       actionTo = Action.wolfKillEd;
-    } else {
+    } else if (data.checkOutType === 'man') {
       action = Action.goodMan;
       actionTo = Action.goodManEd;
+    } else if (data.checkOutType === 'check') {
+      action = Action.checkOrder;
     }
     gamerAction({
       gamer : gamer,
       action : action,
-      gamerWith : to
+      gamerWith : to,
+      withMan : withMan,
     });
-    gamerAction({
-      gamer : to,
-      action : actionTo,
-      gamerWith : gamer,
-    });
-
-    addGameInfo(action.desc({gamer : gamer, gamerWith : to}))
+    if (actionTo) {
+      gamerAction({
+        gamer : to,
+        action : actionTo,
+        gamerWith : gamer,
+        withMan : withMan,
+      });
+    }
+    addGameInfo(action.desc({gamer : gamer, gamerWith : to, withMan : withMan}))
   }
 
   _behaviourAction (data) {
