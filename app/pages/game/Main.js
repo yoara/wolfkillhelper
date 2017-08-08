@@ -357,7 +357,7 @@ export default class Main extends React.Component {
   _signAction (data) {
     let role = data.item.role;
     let gamer = gameData.gamers[this.state.gamerIndex - 1];
-    gamer.sign = role.shortName;
+    gamer.sign = role;
   }
 
   _declare () {
@@ -636,7 +636,7 @@ export default class Main extends React.Component {
           style={styles.body_edge_window_text}>
           {
             gamer.text + (gamer.isSheriff ? "徽" : "") +
-            (gamer.sign ? "\r\n标:" + gamer.sign : "") +
+            (gamer.sign ? "\r\n标:" + gamer.sign.shortName : "") +
             (gamer.declare ? "\r\n认:" + gamer.declare.shortName : "") +
             (gamer.isAlive ? "" : "\r\n(死亡)")
           }</Text>

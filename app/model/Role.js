@@ -102,38 +102,38 @@ const roleMap = {
 
 const roleList = [
   {
-    text : villager.shortName,
+    text : villager.name,
     role : villager
   },
   {
-    text : wolf.shortName,
+    text : wolf.name,
     role : wolf
   },
   {
-    text : witch.shortName,
+    text : witch.name,
     role : witch
   },
   {
-    text : hunter.shortName,
+    text : hunter.name,
     role : hunter
   },
   {
-    text : guard.shortName,
+    text : guard.name,
     role : guard
   }, {
-    text : prophet.shortName,
+    text : prophet.name,
     role : prophet
   },
   {
-    text : whiteWolf.shortName,
+    text : whiteWolf.name,
     role : whiteWolf
   },
   {
-    text : cupid.shortName,
+    text : cupid.name,
     role : cupid
   },
   {
-    text : god.shortName,
+    text : god.name,
     role : god
   },
 ];
@@ -181,35 +181,39 @@ const wolfList = [
 
 const declareList = [
   {
-    text : villager_up.shortName,
+    text : villager_up.name,
     role : villager_up
   },
   {
-    text : god_up.shortName,
+    text : god_up.name,
     role : god_up
   },
   {
-    text : witch.shortName,
+    text : villager.name,
+    role : villager
+  },
+  {
+    text : witch.name,
     role : witch
   },
   {
-    text : hunter.shortName,
+    text : hunter.name,
     role : hunter
   },
   {
-    text : guard.shortName,
+    text : guard.name,
     role : guard
   },
   {
-    text : prophet.shortName,
+    text : prophet.name,
     role : prophet
   },
   {
-    text : cupid.shortName,
+    text : cupid.name,
     role : cupid
   },
   {
-    text : wolf.shortName,
+    text : wolf.name,
     role : wolf
   },
 ];

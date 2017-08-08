@@ -216,7 +216,7 @@ export default class InitGame extends React.Component {
 
         <View style={[styles.modelView, {flexDirection : 'row'}]}>
           <View style={[styles.model_Text, styles.model_Text_WidthHalf]}>
-            <Text style={styles.model_Text_Word}>{this.state.myRole ? this.state.myRole.shortName : '请选择角色'}</Text>
+            <Text style={styles.model_Text_Word}>{this.state.myRole ? this.state.myRole.name : '请选择角色'}</Text>
           </View>
           <TouchableHighlight style={[styles.model_Button]}
                               onPress={() => this._chooseMyRole()} underlayColor="#E1F6FF">

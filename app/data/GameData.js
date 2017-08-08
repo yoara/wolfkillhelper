@@ -90,7 +90,8 @@ function getLoginInfo () {
   let text = "";
   for (let v1 of gameData.gamers) {
     //认预言家或标记为预言家
-    if ((v1.sign && v1.sign.id === prophet.id) || (v1.declare && v1.declare.id === prophet.id)) {
+    if ((v1.sign && v1.sign.id === prophet.id) || (v1.declare && v1.declare.id === prophet.id) ||
+      (v1.index === gameData.gameConfig.myIndex && gameData.gameConfig.myRole.id === prophet.id)) {
       text += "【" + v1.index + "号玩家】预言家逻辑\r\n";
       //查杀
       let wolfKill = "";
@@ -106,13 +107,18 @@ function getLoginInfo () {
       let challengeToEd = "";
       //摇摆人
       let changeMan = "";
+      //警徽流
+      let checkOut = "";
       for (let ac of v1.action) {
-        if(ac.action.id === Action.voteEd.id){
+        if (ac.action.id === Action.voteEd.id) {
           if (ac.timeLine.id > 1) {
-            voteEd += "--【" + ac.timeLine.desc + "】" + ac.action.withMan + "\r\n";
-          }else if(ac.timeLine === JZJX){
+            voteEd += "└─【" + ac.timeLine.desc + "】" + ac.action.withMan + "\r\n";
+          } else if (ac.timeLine === JZJX) {
             standToEd += ac.action.withMan;
           }
+        }
+        if (ac.action.id === Action.checkOrder.id) {
+          checkOut += "└─【" + ac.timeLine.desc + "】" + ac.action.withMan + "\r\n";
         }
         if (ac.action.gamerWith) {
           let gamerIndex = ac.action.gamerWith.index + " ";
@@ -158,8 +164,9 @@ function getLoginInfo () {
           }
         }
       }
-      text += "【查杀】" + wolfKill + "\r\n";
+      text += "【警徽流】\r\n" + checkOut;
       text += "【被投票】\r\n" + voteEd;
+      text += "【查杀】" + wolfKill + "\r\n";
       text += "【金水】" + goodMan + "\r\n";
       text += "【被站边】" + standToEd + "\r\n";
       text += "【被轻踩】" + tallToEd + "\r\n";
