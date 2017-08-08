@@ -728,6 +728,7 @@ export default class Main extends React.Component {
               (this.state.gamerIndex ? this.state.gamerIndex + "号" : "未选择") + "玩家】"}</Text>
               <View style={styles.headerContainerView}>
                 {
+                  gameData.gameConfig.myIndex!==this.state.gamerIndex &&
                   this.state.gamerIndex ?
                     <TouchableOpacity
                       style={styles.footerButton}
